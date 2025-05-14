@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -47,6 +48,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Stel de standaardwaarde in voor 'role' als 'user' bij het aanmaken van een nieuwe gebruiker.
+     */
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->role)) {
+                $user->role = 'user';
+            }
+
+            $user->id = random_int(1000000000, 9999999999);
+        });
     }
 
     // 👇 Relaties
