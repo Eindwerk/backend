@@ -1,0 +1,1762 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Stadion Tracker API",
+        "description": "API-documentatie voor stadionbezoeken, wedstrijden, posts en gebruikersinteractie.",
+        "contact": {
+            "email": "cedricvanhoorebeke@outlook.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://backend.ddev.site",
+            "description": "DDEV omgeving"
+        }
+    ],
+    "paths": {
+        "/api/comments": {
+            "post": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Voeg een reactie toe",
+                "description": "Voeg een reactie toe aan een post",
+                "operationId": "300619a0a4003920aafe960e45688102",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "post_id",
+                                    "comment"
+                                ],
+                                "properties": {
+                                    "post_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Wat een sfeer daar!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Reactie succesvol aangemaakt",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 12
+                                        },
+                                        "user_id": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "post_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "comment": {
+                                            "type": "string",
+                                            "example": "Wat een sfeer daar!"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/comments/{id}": {
+            "delete": {
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "Verwijder een bestaande reactie",
+                "description": "Verwijder een reactie",
+                "operationId": "721e5dc0c32ef81276203df965767606",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van de reactie",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Reactie succesvol verwijderd"
+                    },
+                    "403": {
+                        "description": "Geen toestemming om deze reactie te verwijderen"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/games": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Lijst van alle gespeelde en geplande wedstrijden",
+                "description": "Toon alle wedstrijden",
+                "operationId": "93736f40a135111a310e4b25ad61f30b",
+                "responses": {
+                    "200": {
+                        "description": "Lijst van games",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Game"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Maak een nieuwe wedstrijd aan",
+                "description": "Voeg een nieuwe wedstrijd toe",
+                "operationId": "b8b9557618eb0f7b3650bdd4ab3a6487",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "stadium_id",
+                                    "home_team_id",
+                                    "away_team_id",
+                                    "match_date"
+                                ],
+                                "properties": {
+                                    "stadium_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "home_team_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "away_team_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "home_score": {
+                                        "type": "integer",
+                                        "example": 2,
+                                        "nullable": true
+                                    },
+                                    "away_score": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "match_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-05-15"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Wedstrijd succesvol aangemaakt",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Game"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{id}": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Details van een wedstrijd",
+                "description": "Toon één specifieke wedstrijd",
+                "operationId": "f0bce1dcff3d56d19826d671761a43ff",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van de wedstrijd",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Wedstrijd gevonden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Game"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Update gegevens van een wedstrijd",
+                "description": "Werk een bestaande wedstrijd bij",
+                "operationId": "7a7a51e92437ab9405a4bd9153eacec7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van de wedstrijd",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "stadium_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "home_team_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "away_team_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "home_score": {
+                                        "type": "integer",
+                                        "example": 3,
+                                        "nullable": true
+                                    },
+                                    "away_score": {
+                                        "type": "integer",
+                                        "example": 0,
+                                        "nullable": true
+                                    },
+                                    "match_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-05-20"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Wedstrijd geüpdatet",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Game"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Verwijder een wedstrijd",
+                "description": "Verwijder een wedstrijd",
+                "operationId": "1b52414d7af18b35901add3451cba91c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van de wedstrijd",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Wedstrijd verwijderd"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/likes": {
+            "post": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Voeg een like toe aan een post",
+                "description": "Like een post",
+                "operationId": "511c8161eb44f7b3479a914692d975ee",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "post_id"
+                                ],
+                                "properties": {
+                                    "post_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Post geliket",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "user_id": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "post_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/likes/{post_id}": {
+            "delete": {
+                "tags": [
+                    "Likes"
+                ],
+                "summary": "Verwijder een like van een post",
+                "description": "Unlike een post",
+                "operationId": "93f47e540787d577a30a2188b6fcfb66",
+                "parameters": [
+                    {
+                        "name": "post_id",
+                        "in": "path",
+                        "description": "ID van de post",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Like verwijderd",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "deleted": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Like niet gevonden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Toon meldingen voor de huidige gebruiker",
+                "description": "Haal alle meldingen op van de ingelogde gebruiker",
+                "operationId": "911565ad9aff9ba7eded3f189509e578",
+                "responses": {
+                    "200": {
+                        "description": "Lijst met notificaties",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "user_id": {
+                                                "type": "integer",
+                                                "example": 5
+                                            },
+                                            "sender_id": {
+                                                "type": "integer",
+                                                "example": 3
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "example": "comment"
+                                            },
+                                            "game_id": {
+                                                "type": "integer",
+                                                "example": 2,
+                                                "nullable": true
+                                            },
+                                            "post_id": {
+                                                "type": "integer",
+                                                "example": 9,
+                                                "nullable": true
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/notifications/{id}": {
+            "delete": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Verwijder een notificatie",
+                "description": "Verwijder een melding",
+                "operationId": "54c4eb5ec5dc0d1e2916cec2fced1056",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van de notificatie",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Notificatie succesvol verwijderd"
+                    },
+                    "403": {
+                        "description": "Geen toegang om deze notificatie te verwijderen"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/posts": {
+            "get": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Lijst van posts",
+                "description": "Toon alle posts",
+                "operationId": "e9eaf7df702a94f4443677bd1a36cfe6",
+                "responses": {
+                    "200": {
+                        "description": "Overzicht van posts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Post"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Creëer een nieuwe post over een wedstrijd",
+                "description": "Maak een nieuwe post",
+                "operationId": "4a657e51a0066c64781851f2fd2651e2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "game_id",
+                                    "content"
+                                ],
+                                "properties": {
+                                    "game_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Geweldige sfeer in het stadion!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Post succesvol aangemaakt",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Post"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/posts/{id}": {
+            "get": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Bekijk een specifieke post",
+                "description": "Toon een specifieke post",
+                "operationId": "b0f9d92879218f68a376b6edc6467c67",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van de post",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Details van de post",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Post"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Bewerk een bestaande post",
+                "description": "Update een post",
+                "operationId": "929614537d76a081a92170a41ed3bdb3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van de post",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Aangepaste inhoud"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Post bijgewerkt",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Post"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Niet gemachtigd"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Verwijder een post",
+                "description": "Verwijder een post",
+                "operationId": "fad1726bd24cd459fc1525b67985df39",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van de post",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Post verwijderd"
+                    },
+                    "403": {
+                        "description": "Niet gemachtigd om te verwijderen"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/stadiums": {
+            "get": {
+                "tags": [
+                    "Stadiums"
+                ],
+                "summary": "Toon alle stadions",
+                "operationId": "e9d19b4fa2309d858ad54950b6035a88",
+                "responses": {
+                    "200": {
+                        "description": "Lijst van stadions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Stadium"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Stadiums"
+                ],
+                "summary": "Voeg een stadion toe",
+                "operationId": "73243d27184c81bef747d67cbb8ce256",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "city",
+                                    "capacity"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Signal Iduna Park"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Dortmund"
+                                    },
+                                    "capacity": {
+                                        "type": "integer",
+                                        "example": 81365
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Stadion aangemaakt",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Stadium"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/stadiums/{id}": {
+            "get": {
+                "tags": [
+                    "Stadiums"
+                ],
+                "summary": "Toon één stadion",
+                "operationId": "3010630415c0601fa4ec520977e806ea",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het stadion",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Stadion gevonden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Stadium"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Stadiums"
+                ],
+                "summary": "Update een stadion",
+                "operationId": "be8208d807986164fd934ff346472869",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het stadion",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Borussia-Park"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Mönchengladbach"
+                                    },
+                                    "capacity": {
+                                        "type": "integer",
+                                        "example": 54000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Stadion geüpdatet",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Stadium"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Stadiums"
+                ],
+                "summary": "Verwijder een stadion",
+                "operationId": "10a6a12367522d9200ae2f6921b476cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het stadion",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Stadion verwijderd"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/teams": {
+            "get": {
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Toon alle teams",
+                "operationId": "fc1c5dd9ef530faf6e8bba930cad296c",
+                "responses": {
+                    "200": {
+                        "description": "Lijst van teams",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Team"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Voeg een team toe",
+                "operationId": "b05c08b4a03b1d708fc94bf7dd5f8e46",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "league"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Borussia Dortmund"
+                                    },
+                                    "league": {
+                                        "type": "string",
+                                        "example": "Bundesliga"
+                                    },
+                                    "logo_url": {
+                                        "type": "string",
+                                        "example": "https://example.com/logo.png"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Team aangemaakt",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Team"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/teams/{id}": {
+            "get": {
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Toon een team",
+                "operationId": "ab05003decb5cbc16154382836f51e3e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het team",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Teamdetails",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Team"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Update een team",
+                "operationId": "172602424f911881f80fc01c915f1e57",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het team",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Borussia Dortmund"
+                                    },
+                                    "league": {
+                                        "type": "string",
+                                        "example": "Bundesliga"
+                                    },
+                                    "logo_url": {
+                                        "type": "string",
+                                        "example": "https://example.com/logo.png"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Team geüpdatet",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Team"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Teams"
+                ],
+                "summary": "Verwijder een team",
+                "operationId": "9b992594932c3e54aa58b58c3c1e933c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het team",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Team verwijderd"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/visits": {
+            "get": {
+                "tags": [
+                    "Visits"
+                ],
+                "summary": "Toon alle bezoeken van de ingelogde gebruiker",
+                "operationId": "59bc502e31c31bcb9d32d86e06260de5",
+                "responses": {
+                    "200": {
+                        "description": "Lijst van bezoeken",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Visit"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Visits"
+                ],
+                "summary": "Registreer een stadionbezoek",
+                "operationId": "2ff60d5091a706b6942379521ae9074f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "game_id"
+                                ],
+                                "properties": {
+                                    "game_id": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "visited_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-05-12"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Eerste keer in dit stadion!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Bezoek geregistreerd",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Visit"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/visits/{id}": {
+            "get": {
+                "tags": [
+                    "Visits"
+                ],
+                "summary": "Toon een specifiek stadionbezoek",
+                "operationId": "42d6ce6dce87180d7400f1a2ad20259e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het bezoek",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bezoekdetails",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Visit"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Geen toegang tot dit bezoek"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Visits"
+                ],
+                "summary": "Update een stadionbezoek",
+                "operationId": "460d80e475b87e62bf034f944d29cacf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het bezoek",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Visit"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bezoek geüpdatet",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Visit"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Visits"
+                ],
+                "summary": "Verwijder een bezoek",
+                "operationId": "17961e50292ffea006c5ff414d95307b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID van het bezoek",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Bezoek verwijderd"
+                    },
+                    "403": {
+                        "description": "Niet gemachtigd"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Stadium": {
+                "required": [
+                    "name",
+                    "city",
+                    "capacity"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Allianz Arena"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "München"
+                    },
+                    "capacity": {
+                        "type": "integer",
+                        "example": 75000
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-01T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-10T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Team": {
+                "required": [
+                    "name",
+                    "league"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Borussia Dortmund"
+                    },
+                    "league": {
+                        "type": "string",
+                        "example": "Bundesliga"
+                    },
+                    "logo_url": {
+                        "type": "string",
+                        "example": "https://example.com/logo.png",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-01T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Comment": {
+                "required": [
+                    "user_id",
+                    "post_id",
+                    "comment"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "post_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "comment": {
+                        "type": "string",
+                        "example": "Leuke sfeer tijdens de match!"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:05:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Game": {
+                "required": [
+                    "stadium_id",
+                    "home_team_id",
+                    "away_team_id",
+                    "match_date"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "stadium_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "home_team_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "away_team_id": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "home_score": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "away_score": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "match_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-05-14"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:05:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Like": {
+                "required": [
+                    "user_id",
+                    "post_id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "post_id": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:15:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Notification": {
+                "required": [
+                    "user_id",
+                    "sender_id",
+                    "type"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 22
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "sender_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "comment"
+                    },
+                    "game_id": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "post_id": {
+                        "type": "integer",
+                        "example": 9,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:20:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Post": {
+                "required": [
+                    "user_id",
+                    "game",
+                    "content"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "game": {
+                        "$ref": "#/components/schemas/Game"
+                    },
+                    "comments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Comment"
+                        }
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "Wat een sfeer tijdens die derby!"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T09:55:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:05:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Visit": {
+                "required": [
+                    "user_id",
+                    "game"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 14
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "game": {
+                        "$ref": "#/components/schemas/Game"
+                    },
+                    "visited_at": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-05-12",
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "Geweldige sfeer, veel pyro!",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:15:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-14T10:20:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Comments",
+            "description": "Endpoints voor reacties op posts"
+        },
+        {
+            "name": "Games",
+            "description": "Wedstrijden tussen teams in een stadion"
+        },
+        {
+            "name": "Likes",
+            "description": "Liken en unliken van posts"
+        },
+        {
+            "name": "Notifications",
+            "description": "Meldingen voor nieuwe posts of bezoeken van vrienden"
+        },
+        {
+            "name": "Posts",
+            "description": "Posts aanmaken over wedstrijden"
+        },
+        {
+            "name": "Stadiums",
+            "description": "Beheer van stadions"
+        },
+        {
+            "name": "Teams",
+            "description": "Beheer van voetbalteams"
+        },
+        {
+            "name": "Visits",
+            "description": "Bijhouden van bezochte wedstrijden"
+        }
+    ]
+}
