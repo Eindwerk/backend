@@ -11,7 +11,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Columns\ImageColumn;
 
 class UserResource extends Resource
 {
@@ -44,16 +43,6 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-
-                Forms\Components\Select::make('role')
-                    ->label('Rol')
-                    ->options([
-                        'admin' => 'Admin',
-                        'super_admin' => 'Super Admin',
-                    ])
-                    ->required()
-                    ->disabled(fn() => Auth::user()->role !== 'super_admin')
-                    ->dehydrated(fn() => Auth::user()->role === 'super_admin'),
             ]);
     }
 
@@ -72,7 +61,7 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()->visible(fn() => Auth::user()->role !== 'user'),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -83,7 +72,6 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
@@ -100,17 +88,17 @@ class UserResource extends Resource
 
     public static function canCreate(): bool
     {
-        return Auth::check() && Auth::user()->role === 'super_admin';
+        return false;
     }
 
     public static function canEdit($record): bool
     {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+        return false;
     }
 
     public static function canDelete($record): bool
     {
-        return Auth::check() && Auth::user()->role === 'super_admin';
+        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
     }
 
     public static function canDeleteAny(): bool
