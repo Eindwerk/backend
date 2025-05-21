@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Auth;
 class LikeController extends Controller
 {
     /**
-     * Like een post
-     *
      * @OA\Post(
      *     path="/api/likes",
      *     summary="Voeg een like toe aan een post",
@@ -34,13 +32,9 @@ class LikeController extends Controller
      *     @OA\Response(
      *         response=201,
      *         description="Post geliket",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="id", type="integer", example=10),
-     *             @OA\Property(property="user_id", type="integer", example=3),
-     *             @OA\Property(property="post_id", type="integer", example=1),
-     *             @OA\Property(property="created_at", type="string", format="date-time"),
-     *         )
-     *     )
+     *         @OA\JsonContent(ref="#/components/schemas/Like")
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function store(LikeRequest $request): JsonResponse
@@ -54,8 +48,6 @@ class LikeController extends Controller
     }
 
     /**
-     * Unlike een post
-     *
      * @OA\Delete(
      *     path="/api/likes/{post_id}",
      *     summary="Verwijder een like van een post",
@@ -75,10 +67,8 @@ class LikeController extends Controller
      *             @OA\Property(property="deleted", type="boolean", example=true)
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Like niet gevonden"
-     *     )
+     *     @OA\Response(response=404, description="Like niet gevonden"),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function destroy($post_id): JsonResponse

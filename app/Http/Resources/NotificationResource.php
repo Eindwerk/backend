@@ -13,9 +13,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="user_id", type="integer", example=1),
  *     @OA\Property(property="sender_id", type="integer", example=2),
  *     @OA\Property(property="type", type="string", example="comment"),
- *     @OA\Property(property="game_id", type="integer", example=5, nullable=true),
- *     @OA\Property(property="post_id", type="integer", example=9, nullable=true),
- *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-14T10:20:00Z")
+ *     @OA\Property(property="game_id", type="integer", nullable=true, example=5),
+ *     @OA\Property(property="post_id", type="integer", nullable=true, example=9),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-14T10:20:00Z"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-05-14T10:30:00Z")
  * )
  */
 class NotificationResource extends JsonResource
@@ -35,6 +36,7 @@ class NotificationResource extends JsonResource
             'game_id' => $this->game_id,
             'post_id' => $this->post_id,
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

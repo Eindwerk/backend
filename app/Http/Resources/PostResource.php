@@ -34,9 +34,9 @@ class PostResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'game' => new \App\Http\Resources\GameResource($this->whenLoaded('game')),
-            'content' => $this->content,
+            'game' => new GameResource($this->whenLoaded('game')),
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
+            'content' => $this->content,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

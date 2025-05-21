@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Auth;
 class PostController extends Controller
 {
     /**
-     * Toon alle posts
-     *
      * @OA\Get(
      *     path="/api/posts",
      *     summary="Lijst van posts",
@@ -28,7 +26,8 @@ class PostController extends Controller
      *         response=200,
      *         description="Overzicht van posts",
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Post"))
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function index(): JsonResponse
@@ -38,8 +37,6 @@ class PostController extends Controller
     }
 
     /**
-     * Maak een nieuwe post
-     *
      * @OA\Post(
      *     path="/api/posts",
      *     summary="Creëer een nieuwe post over een wedstrijd",
@@ -57,7 +54,8 @@ class PostController extends Controller
      *         response=201,
      *         description="Post succesvol aangemaakt",
      *         @OA\JsonContent(ref="#/components/schemas/Post")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function store(PostRequest $request): JsonResponse
@@ -71,8 +69,6 @@ class PostController extends Controller
     }
 
     /**
-     * Toon een specifieke post
-     *
      * @OA\Get(
      *     path="/api/posts/{id}",
      *     summary="Bekijk een specifieke post",
@@ -89,7 +85,9 @@ class PostController extends Controller
      *         response=200,
      *         description="Details van de post",
      *         @OA\JsonContent(ref="#/components/schemas/Post")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=404, description="Post niet gevonden")
      * )
      */
     public function show(Post $post): JsonResponse
@@ -98,9 +96,7 @@ class PostController extends Controller
     }
 
     /**
-     * Update een post
-     *
-     * @OA\Put(
+     * @OA\Patch(
      *     path="/api/posts/{id}",
      *     summary="Bewerk een bestaande post",
      *     tags={"Posts"},
@@ -123,10 +119,9 @@ class PostController extends Controller
      *         description="Post bijgewerkt",
      *         @OA\JsonContent(ref="#/components/schemas/Post")
      *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Niet gemachtigd"
-     *     )
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=403, description="Niet gemachtigd"),
+     *     @OA\Response(response=404, description="Post niet gevonden")
      * )
      */
     public function update(PostRequest $request, Post $post): JsonResponse
@@ -138,8 +133,6 @@ class PostController extends Controller
     }
 
     /**
-     * Verwijder een post
-     *
      * @OA\Delete(
      *     path="/api/posts/{id}",
      *     summary="Verwijder een post",
@@ -156,10 +149,9 @@ class PostController extends Controller
      *         response=204,
      *         description="Post verwijderd"
      *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Niet gemachtigd om te verwijderen"
-     *     )
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=403, description="Niet gemachtigd om te verwijderen"),
+     *     @OA\Response(response=404, description="Post niet gevonden")
      * )
      */
     public function destroy(Post $post): JsonResponse

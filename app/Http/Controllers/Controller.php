@@ -14,19 +14,23 @@ use Illuminate\Routing\Controller as BaseController;
  *     version="1.0.0",
  *     @OA\Contact(
  *         email="cedricvanhoorebeke@outlook.com"
+ *     ),
+ *     @OA\License(
+ *         name="MIT",
+ *         url="https://opensource.org/licenses/MIT"
  *     )
  * )
  *
  * @OA\Server(
- *     url="http://backend.ddev.site",
- *     description="DDEV omgeving"
+ *     url="https://backend.ddev.site",
+ *     description="DDEV ontwikkelomgeving"
  * )
  *
  * @OA\SecurityScheme(
  *     securityScheme="sanctum",
  *     type="http",
  *     scheme="bearer",
- *     bearerFormat="JWT"
+ *     bearerFormat="Token"
  * )
  */
 class Controller extends BaseController

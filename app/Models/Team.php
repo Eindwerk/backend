@@ -19,6 +19,7 @@ class Team extends Model
         'name',
         'logo_url',
         'league',
+        'banner_image',
     ];
 
     /**
@@ -35,5 +36,10 @@ class Team extends Model
     public function awayGames(): HasMany
     {
         return $this->hasMany(Game::class, 'away_team_id');
+    }
+
+    public function followers()
+    {
+        return $this->morphToMany(User::class, 'followable', 'follows');
     }
 }

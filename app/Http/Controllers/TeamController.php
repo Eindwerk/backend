@@ -12,17 +12,6 @@ use Illuminate\Http\JsonResponse;
  *     name="Teams",
  *     description="Beheer van voetbalteams"
  * )
- *
- * @OA\Schema(
- *     schema="Team",
- *     required={"name", "league"},
- *     @OA\Property(property="id", type="integer", readOnly=true, example=1),
- *     @OA\Property(property="name", type="string", example="Borussia Dortmund"),
- *     @OA\Property(property="league", type="string", example="Bundesliga"),
- *     @OA\Property(property="logo_url", type="string", nullable=true, example="https://example.com/logo.png"),
- *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-01T10:00:00Z"),
- *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-05-01T12:00:00Z")
- * )
  */
 class TeamController extends Controller
 {
@@ -36,7 +25,8 @@ class TeamController extends Controller
      *         response=200,
      *         description="Lijst van teams",
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Team"))
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function index(): JsonResponse
@@ -63,7 +53,8 @@ class TeamController extends Controller
      *         response=201,
      *         description="Team aangemaakt",
      *         @OA\JsonContent(ref="#/components/schemas/Team")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function store(TeamRequest $request): JsonResponse
@@ -89,7 +80,9 @@ class TeamController extends Controller
      *         response=200,
      *         description="Teamdetails",
      *         @OA\JsonContent(ref="#/components/schemas/Team")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=404, description="Niet gevonden")
      * )
      */
     public function show(Team $team): JsonResponse
@@ -98,7 +91,7 @@ class TeamController extends Controller
     }
 
     /**
-     * @OA\Put(
+     * @OA\Patch(
      *     path="/api/teams/{id}",
      *     summary="Update een team",
      *     tags={"Teams"},
@@ -122,7 +115,10 @@ class TeamController extends Controller
      *         response=200,
      *         description="Team geüpdatet",
      *         @OA\JsonContent(ref="#/components/schemas/Team")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=403, description="Geen rechten"),
+     *     @OA\Response(response=404, description="Niet gevonden")
      * )
      */
     public function update(TeamRequest $request, Team $team): JsonResponse
@@ -147,7 +143,10 @@ class TeamController extends Controller
      *     @OA\Response(
      *         response=204,
      *         description="Team verwijderd"
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=403, description="Geen rechten"),
+     *     @OA\Response(response=404, description="Niet gevonden")
      * )
      */
     public function destroy(Team $team): JsonResponse

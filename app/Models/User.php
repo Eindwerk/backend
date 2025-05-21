@@ -8,8 +8,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -25,6 +26,8 @@ class User extends Authenticatable
         'description',
         'role',
         'profile_image',
+        'username',
+        'banner_image',
     ];
 
     /**
@@ -64,7 +67,6 @@ class User extends Authenticatable
         });
     }
 
-    // 👇 Relaties
 
     public function visits(): HasMany
     {
@@ -101,7 +103,27 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
-    // 👇 Helper functie voor Filament toegang
+    public function follows(): HasMany
+    {
+        return $this->hasMany(\App\Models\Follow::class);
+    }
+
+
+    public function followedTeams()
+    {
+        return $this->morphedByMany(Team::class, 'followable', 'follows');
+    }
+
+    public function followedStadiums()
+    {
+        return $this->morphedByMany(Stadium::class, 'followable', 'follows');
+    }
+
+    public function followedUsers()
+    {
+        return $this->morphedByMany(User::class, 'followable', 'follows');
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === 'super_admin';

@@ -26,7 +26,8 @@ class VisitController extends Controller
      *         response=200,
      *         description="Lijst van bezoeken",
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Visit"))
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function index(): JsonResponse
@@ -47,14 +48,15 @@ class VisitController extends Controller
      *             required={"game_id"},
      *             @OA\Property(property="game_id", type="integer", example=5),
      *             @OA\Property(property="visited_at", type="string", format="date", example="2025-05-12"),
-     *             @OA\Property(property="notes", type="string", example="Eerste keer in dit stadion!")
+     *             @OA\Property(property="notes", type="string", example="Leuk stadion met goede sfeer.")
      *         )
      *     ),
      *     @OA\Response(
      *         response=201,
      *         description="Bezoek geregistreerd",
      *         @OA\JsonContent(ref="#/components/schemas/Visit")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function store(VisitRequest $request): JsonResponse
@@ -64,7 +66,6 @@ class VisitController extends Controller
             ...$request->validated(),
         ]);
 
-        // Meldingen naar vrienden!
         $user = Auth::user();
         foreach ($user->friendships as $friendship) {
             $friend = $friendship->friend;
@@ -98,10 +99,7 @@ class VisitController extends Controller
      *         description="Bezoekdetails",
      *         @OA\JsonContent(ref="#/components/schemas/Visit")
      *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Geen toegang tot dit bezoek"
-     *     )
+     *     @OA\Response(response=403, description="Geen toegang tot dit bezoek")
      * )
      */
     public function show(Visit $visit): JsonResponse
@@ -111,7 +109,7 @@ class VisitController extends Controller
     }
 
     /**
-     * @OA\Put(
+     * @OA\Patch(
      *     path="/api/visits/{id}",
      *     summary="Update een stadionbezoek",
      *     tags={"Visits"},
@@ -125,13 +123,17 @@ class VisitController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/Visit")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="visited_at", type="string", format="date", example="2025-05-12"),
+     *             @OA\Property(property="notes", type="string", example="Bijgewerkte notitie")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Bezoek geüpdatet",
      *         @OA\JsonContent(ref="#/components/schemas/Visit")
-     *     )
+     *     ),
+     *     @OA\Response(response=403, description="Niet gemachtigd")
      * )
      */
     public function update(VisitRequest $request, Visit $visit): JsonResponse
@@ -159,10 +161,7 @@ class VisitController extends Controller
      *         response=204,
      *         description="Bezoek verwijderd"
      *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Niet gemachtigd"
-     *     )
+     *     @OA\Response(response=403, description="Niet gemachtigd")
      * )
      */
     public function destroy(Visit $visit): JsonResponse

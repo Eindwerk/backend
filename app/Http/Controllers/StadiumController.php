@@ -12,18 +12,6 @@ use Illuminate\Http\JsonResponse;
  *     name="Stadiums",
  *     description="Beheer van stadions"
  * )
- *
- * @OA\Schema(
- *     schema="Stadium",
- *     type="object",
- *     required={"name", "city", "capacity"},
- *     @OA\Property(property="id", type="integer", readOnly=true, example=1),
- *     @OA\Property(property="name", type="string", example="Allianz Arena"),
- *     @OA\Property(property="city", type="string", example="München"),
- *     @OA\Property(property="capacity", type="integer", example=75000),
- *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-01T10:00:00Z"),
- *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-05-10T12:34:56Z")
- * )
  */
 class StadiumController extends Controller
 {
@@ -37,7 +25,8 @@ class StadiumController extends Controller
      *         response=200,
      *         description="Lijst van stadions",
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Stadium"))
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function index(): JsonResponse
@@ -64,13 +53,13 @@ class StadiumController extends Controller
      *         response=201,
      *         description="Stadion aangemaakt",
      *         @OA\JsonContent(ref="#/components/schemas/Stadium")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function store(StadiumRequest $request): JsonResponse
     {
         $stadium = Stadium::create($request->validated());
-
         return response()->json(new StadiumResource($stadium), 201);
     }
 
@@ -91,7 +80,9 @@ class StadiumController extends Controller
      *         response=200,
      *         description="Stadion gevonden",
      *         @OA\JsonContent(ref="#/components/schemas/Stadium")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=404, description="Niet gevonden")
      * )
      */
     public function show(Stadium $stadium): JsonResponse
@@ -100,7 +91,7 @@ class StadiumController extends Controller
     }
 
     /**
-     * @OA\Put(
+     * @OA\Patch(
      *     path="/api/stadiums/{id}",
      *     tags={"Stadiums"},
      *     summary="Update een stadion",
@@ -124,13 +115,15 @@ class StadiumController extends Controller
      *         response=200,
      *         description="Stadion geüpdatet",
      *         @OA\JsonContent(ref="#/components/schemas/Stadium")
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=403, description="Geen rechten"),
+     *     @OA\Response(response=404, description="Niet gevonden")
      * )
      */
     public function update(StadiumRequest $request, Stadium $stadium): JsonResponse
     {
         $stadium->update($request->validated());
-
         return response()->json(new StadiumResource($stadium));
     }
 
@@ -150,13 +143,15 @@ class StadiumController extends Controller
      *     @OA\Response(
      *         response=204,
      *         description="Stadion verwijderd"
-     *     )
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=403, description="Geen rechten"),
+     *     @OA\Response(response=404, description="Niet gevonden")
      * )
      */
     public function destroy(Stadium $stadium): JsonResponse
     {
         $stadium->delete();
-
         return response()->json(null, 204);
     }
 }

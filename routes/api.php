@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\StadiumController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\GameController;
@@ -11,8 +12,12 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Api\UserProfileController;
+use App\Http\Controllers\Api\FollowController;
+use Illuminate\Auth\Events\Verified;
 
-// Auth-routes
+// === AUTHENTICATIE ===
+
 Route::post('/register', function (Request $request) {
     $request->validate([
         'name' => 'required|string|max:255',
@@ -25,6 +30,8 @@ Route::post('/register', function (Request $request) {
         'email' => $request->email,
         'password' => bcrypt($request->password),
     ]);
+
+    $user->sendEmailVerificationNotification();
 
     return response()->json([
         'token' => $user->createToken('api-token')->plainTextToken,
@@ -50,10 +57,55 @@ Route::post('/login', function (Request $request) {
     ]);
 });
 
+Route::post('/logout', function (Request $request) {
+    $request->user()->currentAccessToken()->delete();
+
+    return response()->json(['message' => 'Uitgelogd.']);
+})->middleware('auth:sanctum');
+
+Route::patch('/users/profile', [UserProfileController::class, 'update'])->middleware('auth:sanctum');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    if ($request->user()->hasVerifiedEmail()) {
+        return response()->json(['message' => 'E-mailadres is al bevestigd.']);
+    }
+
+    $request->user()->sendEmailVerificationNotification();
+
+    return response()->json(['message' => 'Verificatiemail opnieuw verzonden.']);
+})->middleware(['auth:sanctum', 'throttle:6,1']);
+
+Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+    $user = \App\Models\User::findOrFail($id);
+
+    if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        abort(403, 'Ongeldige verificatielink.');
+    }
+
+    if (! $user->hasVerifiedEmail()) {
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+    }
+
+    return response()->json([
+        'message' => 'E-mailadres succesvol bevestigd.',
+        'verified' => true,
+    ]);
+})->middleware(['signed'])->name('verification.verify');
+
 Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->user());
 
-// Beveiligde API resources
-Route::middleware('auth:sanctum')->group(function () {
+// === FOLLOW SYSTEM ===
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/follow', [FollowController::class, 'follow']);
+    Route::delete('/unfollow', [FollowController::class, 'unfollow']);
+    Route::get('/following', [FollowController::class, 'index']);
+});
+
+// === BEVEILIGDE API RESOURCES ===
+
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::apiResource('stadiums', StadiumController::class);
     Route::apiResource('teams', TeamController::class);
     Route::apiResource('games', GameController::class);

@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Auth;
 class NotificationController extends Controller
 {
     /**
-     * Haal alle meldingen op van de ingelogde gebruiker
-     *
      * @OA\Get(
      *     path="/api/notifications",
      *     tags={"Notifications"},
@@ -26,19 +24,9 @@ class NotificationController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Lijst met notificaties",
-     *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="user_id", type="integer", example=5),
-     *                 @OA\Property(property="sender_id", type="integer", example=3),
-     *                 @OA\Property(property="type", type="string", example="comment"),
-     *                 @OA\Property(property="game_id", type="integer", nullable=true, example=2),
-     *                 @OA\Property(property="post_id", type="integer", nullable=true, example=9),
-     *                 @OA\Property(property="created_at", type="string", format="date-time"),
-     *             )
-     *         )
-     *     )
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Notification"))
+     *     ),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function index(): JsonResponse
@@ -52,8 +40,6 @@ class NotificationController extends Controller
     }
 
     /**
-     * Verwijder een melding
-     *
      * @OA\Delete(
      *     path="/api/notifications/{id}",
      *     tags={"Notifications"},
@@ -66,14 +52,10 @@ class NotificationController extends Controller
      *         description="ID van de notificatie",
      *         @OA\Schema(type="integer", example=1)
      *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Notificatie succesvol verwijderd"
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Geen toegang om deze notificatie te verwijderen"
-     *     )
+     *     @OA\Response(response=204, description="Notificatie succesvol verwijderd"),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=403, description="Geen toegang om deze notificatie te verwijderen"),
+     *     @OA\Response(response=404, description="Notificatie niet gevonden")
      * )
      */
     public function destroy(Notification $notification): JsonResponse
@@ -83,6 +65,7 @@ class NotificationController extends Controller
         }
 
         $notification->delete();
+
         return response()->json(null, 204);
     }
 }

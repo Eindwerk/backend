@@ -16,21 +16,13 @@ use Illuminate\Http\JsonResponse;
 class GameController extends Controller
 {
     /**
-     * Toon alle wedstrijden
-     *
      * @OA\Get(
      *     path="/api/games",
      *     tags={"Games"},
      *     summary="Lijst van alle gespeelde en geplande wedstrijden",
      *     security={{"sanctum":{}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lijst van games",
-     *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(ref="#/components/schemas/Game")
-     *         )
-     *     )
+     *     @OA\Response(response=200, description="Lijst van games", @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Game"))),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function index(): JsonResponse
@@ -39,8 +31,6 @@ class GameController extends Controller
     }
 
     /**
-     * Voeg een nieuwe wedstrijd toe
-     *
      * @OA\Post(
      *     path="/api/games",
      *     tags={"Games"},
@@ -58,11 +48,8 @@ class GameController extends Controller
      *             @OA\Property(property="match_date", type="string", format="date", example="2025-05-15")
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Wedstrijd succesvol aangemaakt",
-     *         @OA\JsonContent(ref="#/components/schemas/Game")
-     *     )
+     *     @OA\Response(response=201, description="Wedstrijd aangemaakt", @OA\JsonContent(ref="#/components/schemas/Game")),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function store(GameRequest $request): JsonResponse
@@ -72,25 +59,15 @@ class GameController extends Controller
     }
 
     /**
-     * Toon één specifieke wedstrijd
-     *
      * @OA\Get(
      *     path="/api/games/{id}",
      *     tags={"Games"},
-     *     summary="Details van een wedstrijd",
+     *     summary="Toon details van een wedstrijd",
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID van de wedstrijd",
-     *         @OA\Schema(type="integer", example=5)
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Wedstrijd gevonden",
-     *         @OA\JsonContent(ref="#/components/schemas/Game")
-     *     )
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID van de wedstrijd", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Details van de wedstrijd", @OA\JsonContent(ref="#/components/schemas/Game")),
+     *     @OA\Response(response=404, description="Wedstrijd niet gevonden"),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function show(Game $game): JsonResponse
@@ -99,20 +76,12 @@ class GameController extends Controller
     }
 
     /**
-     * Werk een bestaande wedstrijd bij
-     *
      * @OA\Put(
      *     path="/api/games/{id}",
      *     tags={"Games"},
      *     summary="Update gegevens van een wedstrijd",
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID van de wedstrijd",
-     *         @OA\Schema(type="integer", example=5)
-     *     ),
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID van de wedstrijd", @OA\Schema(type="integer")),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -124,11 +93,8 @@ class GameController extends Controller
      *             @OA\Property(property="match_date", type="string", format="date", example="2025-05-20")
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Wedstrijd geüpdatet",
-     *         @OA\JsonContent(ref="#/components/schemas/Game")
-     *     )
+     *     @OA\Response(response=200, description="Wedstrijd geüpdatet", @OA\JsonContent(ref="#/components/schemas/Game")),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function update(GameRequest $request, Game $game): JsonResponse
@@ -138,24 +104,14 @@ class GameController extends Controller
     }
 
     /**
-     * Verwijder een wedstrijd
-     *
      * @OA\Delete(
      *     path="/api/games/{id}",
      *     tags={"Games"},
      *     summary="Verwijder een wedstrijd",
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID van de wedstrijd",
-     *         @OA\Schema(type="integer", example=5)
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Wedstrijd verwijderd"
-     *     )
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID van de wedstrijd", @OA\Schema(type="integer")),
+     *     @OA\Response(response=204, description="Wedstrijd verwijderd"),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function destroy(Game $game): JsonResponse

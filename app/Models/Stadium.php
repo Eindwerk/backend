@@ -18,8 +18,10 @@ class Stadium extends Model
     protected $fillable = [
         'name',
         'city',
+        'image',
         'capacity',
         'location',
+        'banner_image',
     ];
 
     /**
@@ -37,5 +39,10 @@ class Stadium extends Model
     public function games(): HasMany
     {
         return $this->hasMany(Game::class);
+    }
+
+    public function followers()
+    {
+        return $this->morphToMany(User::class, 'followable', 'follows');
     }
 }

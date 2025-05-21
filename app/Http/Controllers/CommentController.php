@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
+use App\Models\Post;
+use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,8 +19,6 @@ use Illuminate\Support\Facades\Auth;
 class CommentController extends Controller
 {
     /**
-     * Voeg een reactie toe aan een post
-     *
      * @OA\Post(
      *     path="/api/comments",
      *     summary="Voeg een reactie toe",
@@ -35,14 +35,7 @@ class CommentController extends Controller
      *     @OA\Response(
      *         response=201,
      *         description="Reactie succesvol aangemaakt",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="id", type="integer", example=12),
-     *             @OA\Property(property="user_id", type="integer", example=5),
-     *             @OA\Property(property="post_id", type="integer", example=1),
-     *             @OA\Property(property="comment", type="string", example="Wat een sfeer daar!"),
-     *             @OA\Property(property="created_at", type="string", format="date-time"),
-     *             @OA\Property(property="updated_at", type="string", format="date-time")
-     *         )
+     *         @OA\JsonContent(ref="#/components/schemas/Comment")
      *     )
      * )
      */
@@ -53,10 +46,10 @@ class CommentController extends Controller
             ...$request->validated(),
         ]);
 
-        // Melding naar post-eigenaar (indien niet jezelf)
-        $post = \App\Models\Post::find($request->post_id);
+        // Melding naar post-eigenaar
+        $post = Post::find($request->post_id);
         if ($post && $post->user_id !== Auth::id()) {
-            \App\Models\Notification::create([
+            Notification::create([
                 'user_id' => $post->user_id,
                 'sender_id' => Auth::id(),
                 'type' => 'comment',
@@ -69,8 +62,6 @@ class CommentController extends Controller
     }
 
     /**
-     * Verwijder een reactie
-     *
      * @OA\Delete(
      *     path="/api/comments/{id}",
      *     summary="Verwijder een bestaande reactie",
