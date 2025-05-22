@@ -14,8 +14,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="name", type="string", example="Cédric Van Hoorebeke"),
  *     @OA\Property(property="username", type="string", example="cedricvh"),
  *     @OA\Property(property="email", type="string", example="cedric@example.com"),
- *     @OA\Property(property="profile_image", type="string", nullable=true, example="storage/profiles/1.jpg"),
- *     @OA\Property(property="banner_image", type="string", nullable=true, example="storage/banners/1.jpg"),
+ *     @OA\Property(property="profile_image", type="string", nullable=true, example="https://backend.ddev.site/storage/users/profile-image/1.jpg"),
+ *     @OA\Property(property="banner_image", type="string", nullable=true, example="https://backend.ddev.site/storage/users/banner-image/1.jpg"),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time")
  * )
@@ -35,8 +35,8 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'username' => $this->username,
             'email' => $this->email,
-            'profile_image' => $this->profile_image,
-            'banner_image' => $this->banner_image,
+            'profile_image' => $this->profile_image ? asset('storage/' . $this->profile_image) : null,
+            'banner_image' => $this->banner_image ? asset('storage/' . $this->banner_image) : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

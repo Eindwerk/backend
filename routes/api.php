@@ -63,7 +63,8 @@ Route::post('/logout', function (Request $request) {
     return response()->json(['message' => 'Uitgelogd.']);
 })->middleware('auth:sanctum');
 
-Route::patch('/users/profile', [UserProfileController::class, 'update'])->middleware('auth:sanctum');
+Route::patch('/users/profile', [UserProfileController::class, 'update'])
+    ->middleware('auth:sanctum');
 
 Route::post('/email/verification-notification', function (Request $request) {
     if ($request->user()->hasVerifiedEmail()) {

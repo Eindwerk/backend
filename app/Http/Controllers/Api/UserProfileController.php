@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\UpdateUserProfileRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
 /**
  * @OA\Patch(
@@ -38,42 +38,48 @@ use Illuminate\Validation\Rule;
  */
 class UserProfileController extends Controller
 {
-    public function update(Request $request)
+    /**
+     * PATCH /api/users/profile
+     * Content-Type: application/json OR multipart/form-data
+     */
+    public function update(UpdateUserProfileRequest $request): JsonResponse
     {
         $user = $request->user();
 
-        $request->validate([
-            'username' => [
-                'string',
-                Rule::unique('users')->ignore($user->id),
-            ],
-            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'banner_image' => 'nullable|image|mimes:jpg,jpeg,png|max:4096',
-        ]);
+        // Gevalideerde data uit je FormRequest:
+        $data = $request->validated();
 
-        if ($request->filled('username')) {
-            $user->username = $request->username;
+        // 1) Username updaten (indien aanwezig in payload)
+        if (array_key_exists('username', $data)) {
+            $user->username = $data['username'];
         }
 
+        // 2) Profiel-afbeelding updaten (multipart/form-data)
         if ($request->hasFile('profile_image')) {
+            // Oude verwijderen als aanwezig
             if ($user->profile_image) {
                 Storage::disk('public')->delete($user->profile_image);
             }
-            $user->profile_image = $request->file('profile_image')->store('profiles', 'public');
+            // Nieuwe opslaan
+            $user->profile_image = $request->file('profile_image')
+                ->store('users/profile-image', 'public');
         }
 
+        // 3) Banner-afbeelding updaten
         if ($request->hasFile('banner_image')) {
             if ($user->banner_image) {
                 Storage::disk('public')->delete($user->banner_image);
             }
-            $user->banner_image = $request->file('banner_image')->store('banners', 'public');
+            $user->banner_image = $request->file('banner_image')
+                ->store('users/banner-image', 'public');
         }
 
         $user->save();
 
         return response()->json([
             'message' => 'Profiel succesvol bijgewerkt.',
-            'user' => $user, // Overweeg hier eventueel UserResource te gebruiken
+            // Only de velden die je wilt teruggeven
+            'user' => $user->only(['id', 'username', 'profile_image', 'banner_image']),
         ]);
     }
 }

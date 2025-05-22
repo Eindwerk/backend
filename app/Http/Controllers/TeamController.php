@@ -6,6 +6,7 @@ use App\Http\Requests\TeamRequest;
 use App\Http\Resources\TeamResource;
 use App\Models\Team;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @OA\Tag(
@@ -42,11 +43,15 @@ class TeamController extends Controller
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name", "league"},
-     *             @OA\Property(property="name", type="string", example="Borussia Dortmund"),
-     *             @OA\Property(property="league", type="string", example="Bundesliga"),
-     *             @OA\Property(property="logo_url", type="string", example="https://example.com/logo.png")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name", "league"},
+     *                 @OA\Property(property="name", type="string", example="Borussia Dortmund"),
+     *                 @OA\Property(property="league", type="string", example="Bundesliga"),
+     *                 @OA\Property(property="logo_url", type="string", format="binary"),
+     *                 @OA\Property(property="banner_image", type="string", format="binary")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -59,7 +64,18 @@ class TeamController extends Controller
      */
     public function store(TeamRequest $request): JsonResponse
     {
-        $team = Team::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('logo_url')) {
+            $data['logo_url'] = $request->file('logo_url')->store('teams/profile-image', 'public');
+        }
+
+        if ($request->hasFile('banner_image')) {
+            $data['banner_image'] = $request->file('banner_image')->store('teams/banner-image', 'public');
+        }
+
+        $team = Team::create($data);
+
         return response()->json(new TeamResource($team), 201);
     }
 
@@ -105,10 +121,14 @@ class TeamController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="Borussia Dortmund"),
-     *             @OA\Property(property="league", type="string", example="Bundesliga"),
-     *             @OA\Property(property="logo_url", type="string", example="https://example.com/logo.png")
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="name", type="string", example="Borussia Dortmund"),
+     *                 @OA\Property(property="league", type="string", example="Bundesliga"),
+     *                 @OA\Property(property="logo_url", type="string", format="binary"),
+     *                 @OA\Property(property="banner_image", type="string", format="binary")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -123,7 +143,24 @@ class TeamController extends Controller
      */
     public function update(TeamRequest $request, Team $team): JsonResponse
     {
-        $team->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('logo_url')) {
+            if ($team->logo_url) {
+                Storage::disk('public')->delete($team->logo_url);
+            }
+            $data['logo_url'] = $request->file('logo_url')->store('teams/profile-image', 'public');
+        }
+
+        if ($request->hasFile('banner_image')) {
+            if ($team->banner_image) {
+                Storage::disk('public')->delete($team->banner_image);
+            }
+            $data['banner_image'] = $request->file('banner_image')->store('teams/banner-image', 'public');
+        }
+
+        $team->update($data);
+
         return response()->json(new TeamResource($team));
     }
 
@@ -151,7 +188,15 @@ class TeamController extends Controller
      */
     public function destroy(Team $team): JsonResponse
     {
+        if ($team->logo_url) {
+            Storage::disk('public')->delete($team->logo_url);
+        }
+        if ($team->banner_image) {
+            Storage::disk('public')->delete($team->banner_image);
+        }
+
         $team->delete();
+
         return response()->json(null, 204);
     }
 }

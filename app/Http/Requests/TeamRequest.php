@@ -11,7 +11,7 @@ class TeamRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;  // toestaan van requests
     }
 
     /**
@@ -23,7 +23,8 @@ class TeamRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'logo_url' => ['nullable', 'url'],
+            'logo_url' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'banner_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'league' => ['required', 'string', 'max:255'],
         ];
     }

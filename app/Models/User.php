@@ -7,7 +7,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Str;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -53,9 +52,6 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    /**
-     * Stel de standaardwaarde in voor 'role' als 'user' bij het aanmaken van een nieuwe gebruiker.
-     */
     protected static function booted()
     {
         static::creating(function ($user) {

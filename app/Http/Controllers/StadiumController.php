@@ -6,6 +6,7 @@ use App\Http\Requests\StadiumRequest;
 use App\Http\Resources\StadiumResource;
 use App\Models\Stadium;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @OA\Tag(
@@ -42,11 +43,16 @@ class StadiumController extends Controller
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name", "city", "capacity"},
-     *             @OA\Property(property="name", type="string", example="Signal Iduna Park"),
-     *             @OA\Property(property="city", type="string", example="Dortmund"),
-     *             @OA\Property(property="capacity", type="integer", example=81365)
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name", "city", "capacity"},
+     *                 @OA\Property(property="name", type="string", example="Signal Iduna Park"),
+     *                 @OA\Property(property="city", type="string", example="Dortmund"),
+     *                 @OA\Property(property="capacity", type="integer", example=81365),
+     *                 @OA\Property(property="image", type="string", format="binary"),
+     *                 @OA\Property(property="banner_image", type="string", format="binary")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -59,7 +65,18 @@ class StadiumController extends Controller
      */
     public function store(StadiumRequest $request): JsonResponse
     {
-        $stadium = Stadium::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('stadiums/profile-image', 'public');
+        }
+
+        if ($request->hasFile('banner_image')) {
+            $data['banner_image'] = $request->file('banner_image')->store('stadiums/banner-image', 'public');
+        }
+
+        $stadium = Stadium::create($data);
+
         return response()->json(new StadiumResource($stadium), 201);
     }
 
@@ -105,10 +122,15 @@ class StadiumController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="Borussia-Park"),
-     *             @OA\Property(property="city", type="string", example="Mönchengladbach"),
-     *             @OA\Property(property="capacity", type="integer", example=54000)
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="name", type="string", example="Borussia-Park"),
+     *                 @OA\Property(property="city", type="string", example="Mönchengladbach"),
+     *                 @OA\Property(property="capacity", type="integer", example=54000),
+     *                 @OA\Property(property="image", type="string", format="binary"),
+     *                 @OA\Property(property="banner_image", type="string", format="binary")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -123,7 +145,24 @@ class StadiumController extends Controller
      */
     public function update(StadiumRequest $request, Stadium $stadium): JsonResponse
     {
-        $stadium->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            if ($stadium->image) {
+                Storage::disk('public')->delete($stadium->image);
+            }
+            $data['image'] = $request->file('image')->store('stadiums/profile-image', 'public');
+        }
+
+        if ($request->hasFile('banner_image')) {
+            if ($stadium->banner_image) {
+                Storage::disk('public')->delete($stadium->banner_image);
+            }
+            $data['banner_image'] = $request->file('banner_image')->store('stadiums/banner-image', 'public');
+        }
+
+        $stadium->update($data);
+
         return response()->json(new StadiumResource($stadium));
     }
 
@@ -151,7 +190,15 @@ class StadiumController extends Controller
      */
     public function destroy(Stadium $stadium): JsonResponse
     {
+        if ($stadium->image) {
+            Storage::disk('public')->delete($stadium->image);
+        }
+        if ($stadium->banner_image) {
+            Storage::disk('public')->delete($stadium->banner_image);
+        }
+
         $stadium->delete();
+
         return response()->json(null, 204);
     }
 }
