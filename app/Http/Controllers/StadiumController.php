@@ -6,6 +6,7 @@ use App\Http\Requests\StadiumRequest;
 use App\Http\Resources\StadiumResource;
 use App\Models\Stadium;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -90,7 +91,6 @@ class StadiumController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID van het stadion",
      *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\Response(
@@ -111,36 +111,45 @@ class StadiumController extends Controller
      * @OA\Patch(
      *     path="/api/stadiums/{id}",
      *     tags={"Stadiums"},
-     *     summary="Update een stadion",
+     *     summary="Update een stadion (PATCH)",
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID van het stadion",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(
-     *         required=true,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 @OA\Property(property="name", type="string", example="Borussia-Park"),
-     *                 @OA\Property(property="city", type="string", example="Mönchengladbach"),
-     *                 @OA\Property(property="capacity", type="integer", example=54000),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="city", type="string"),
+     *                 @OA\Property(property="capacity", type="integer"),
      *                 @OA\Property(property="image", type="string", format="binary"),
      *                 @OA\Property(property="banner_image", type="string", format="binary")
      *             )
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Stadion geüpdatet",
-     *         @OA\JsonContent(ref="#/components/schemas/Stadium")
+     *     @OA\Response(response=200, description="Stadion geüpdatet", @OA\JsonContent(ref="#/components/schemas/Stadium")),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
+     * )
+     * 
+     * @OA\Post(
+     *     path="/api/stadiums/{id}/update",
+     *     tags={"Stadiums"},
+     *     summary="Update een stadion (POST alternatief)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="city", type="string"),
+     *                 @OA\Property(property="capacity", type="integer"),
+     *                 @OA\Property(property="image", type="string", format="binary"),
+     *                 @OA\Property(property="banner_image", type="string", format="binary")
+     *             )
+     *         )
      *     ),
-     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
-     *     @OA\Response(response=403, description="Geen rechten"),
-     *     @OA\Response(response=404, description="Niet gevonden")
+     *     @OA\Response(response=200, description="Stadion geüpdatet", @OA\JsonContent(ref="#/components/schemas/Stadium")),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function update(StadiumRequest $request, Stadium $stadium): JsonResponse
@@ -148,14 +157,14 @@ class StadiumController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            if ($stadium->image) {
+            if ($stadium->image && Storage::disk('public')->exists($stadium->image)) {
                 Storage::disk('public')->delete($stadium->image);
             }
             $data['image'] = $request->file('image')->store('stadiums/profile-image', 'public');
         }
 
         if ($request->hasFile('banner_image')) {
-            if ($stadium->banner_image) {
+            if ($stadium->banner_image && Storage::disk('public')->exists($stadium->banner_image)) {
                 Storage::disk('public')->delete($stadium->banner_image);
             }
             $data['banner_image'] = $request->file('banner_image')->store('stadiums/banner-image', 'public');
@@ -172,28 +181,18 @@ class StadiumController extends Controller
      *     tags={"Stadiums"},
      *     summary="Verwijder een stadion",
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID van het stadion",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Stadion verwijderd"
-     *     ),
-     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
-     *     @OA\Response(response=403, description="Geen rechten"),
-     *     @OA\Response(response=404, description="Niet gevonden")
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=204, description="Stadion verwijderd"),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function destroy(Stadium $stadium): JsonResponse
     {
-        if ($stadium->image) {
+        if ($stadium->image && Storage::disk('public')->exists($stadium->image)) {
             Storage::disk('public')->delete($stadium->image);
         }
-        if ($stadium->banner_image) {
+
+        if ($stadium->banner_image && Storage::disk('public')->exists($stadium->banner_image)) {
             Storage::disk('public')->delete($stadium->banner_image);
         }
 

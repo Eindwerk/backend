@@ -3,20 +3,25 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\URL;
-use App\Http\Controllers\StadiumController;
-use App\Http\Controllers\TeamController;
-use App\Http\Controllers\GameController;
-use App\Http\Controllers\VisitController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\LikeController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Api\UserProfileController;
-use App\Http\Controllers\Api\FollowController;
 use Illuminate\Auth\Events\Verified;
+use App\Http\Controllers\{
+    StadiumController,
+    TeamController,
+    GameController,
+    VisitController,
+    PostController,
+    CommentController,
+    LikeController,
+    NotificationController
+};
+use App\Http\Controllers\Api\{
+    UserProfileController,
+    FollowController
+};
 
-// === AUTHENTICATIE ===
+// ----------------------------
+// 🔐 AUTHENTICATIE
+// ----------------------------
 
 Route::post('/register', function (Request $request) {
     $request->validate([
@@ -57,16 +62,20 @@ Route::post('/login', function (Request $request) {
     ]);
 });
 
-Route::post('/logout', function (Request $request) {
+Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     $request->user()->currentAccessToken()->delete();
 
     return response()->json(['message' => 'Uitgelogd.']);
-})->middleware('auth:sanctum');
+});
 
-Route::patch('/users/profile', [UserProfileController::class, 'update'])
-    ->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->user());
 
-Route::post('/email/verification-notification', function (Request $request) {
+
+// ----------------------------
+// 📧 E-MAIL VERIFICATIE
+// ----------------------------
+
+Route::middleware(['auth:sanctum', 'throttle:6,1'])->post('/email/verification-notification', function (Request $request) {
     if ($request->user()->hasVerifiedEmail()) {
         return response()->json(['message' => 'E-mailadres is al bevestigd.']);
     }
@@ -74,7 +83,7 @@ Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
 
     return response()->json(['message' => 'Verificatiemail opnieuw verzonden.']);
-})->middleware(['auth:sanctum', 'throttle:6,1']);
+});
 
 Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
     $user = \App\Models\User::findOrFail($id);
@@ -94,17 +103,37 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
     ]);
 })->middleware(['signed'])->name('verification.verify');
 
-Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->user());
 
-// === FOLLOW SYSTEM ===
+// ----------------------------
+// 👤 PROFIEL
+// ----------------------------
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware('auth:sanctum')->post('/users/profile', [UserProfileController::class, 'update']);
+
+
+// ----------------------------
+// ➕ POST routes voor updates (i.p.v. PATCH voor form-data)
+// ----------------------------
+
+Route::middleware('auth:sanctum')->post('/stadiums/{stadium}', [StadiumController::class, 'update']);
+Route::middleware('auth:sanctum')->post('/teams/{team}', [TeamController::class, 'update']);
+
+
+// ----------------------------
+// 🔁 FOLLOW SYSTEM
+// ----------------------------
+
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('/follow', [FollowController::class, 'follow']);
     Route::delete('/unfollow', [FollowController::class, 'unfollow']);
     Route::get('/following', [FollowController::class, 'index']);
 });
 
-// === BEVEILIGDE API RESOURCES ===
+
+// ----------------------------
+// 🔐 BEVEILIGDE API RESOURCES
+// Enkel voor geverifieerde gebruikers
+// ----------------------------
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::apiResource('stadiums', StadiumController::class);
@@ -112,10 +141,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::apiResource('games', GameController::class);
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('posts', PostController::class);
+
     Route::post('comments', [CommentController::class, 'store']);
     Route::delete('comments/{comment}', [CommentController::class, 'destroy']);
+
     Route::post('likes', [LikeController::class, 'store']);
     Route::delete('likes/{post_id}', [LikeController::class, 'destroy']);
+
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::delete('notifications/{notification}', [NotificationController::class, 'destroy']);
 });

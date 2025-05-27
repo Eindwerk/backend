@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * @OA\Patch(
+ * @OA\Post(
  *     path="/api/users/profile",
  *     summary="Update het profiel van de ingelogde gebruiker",
  *     tags={"Profiel"},
@@ -39,37 +39,35 @@ use Illuminate\Support\Facades\Storage;
 class UserProfileController extends Controller
 {
     /**
-     * PATCH /api/users/profile
-     * Content-Type: application/json OR multipart/form-data
+     * POST /api/users/profile
+     * Content-Type: multipart/form-data
      */
     public function update(UpdateUserProfileRequest $request): JsonResponse
     {
         $user = $request->user();
-
-        // Gevalideerde data uit je FormRequest:
         $data = $request->validated();
 
-        // 1) Username updaten (indien aanwezig in payload)
-        if (array_key_exists('username', $data)) {
+        // Username bijwerken
+        if (isset($data['username'])) {
             $user->username = $data['username'];
         }
 
-        // 2) Profiel-afbeelding updaten (multipart/form-data)
+        // Profielafbeelding bijwerken
         if ($request->hasFile('profile_image')) {
-            // Oude verwijderen als aanwezig
             if ($user->profile_image) {
                 Storage::disk('public')->delete($user->profile_image);
             }
-            // Nieuwe opslaan
+
             $user->profile_image = $request->file('profile_image')
                 ->store('users/profile-image', 'public');
         }
 
-        // 3) Banner-afbeelding updaten
+        // Bannerafbeelding bijwerken
         if ($request->hasFile('banner_image')) {
             if ($user->banner_image) {
                 Storage::disk('public')->delete($user->banner_image);
             }
+
             $user->banner_image = $request->file('banner_image')
                 ->store('users/banner-image', 'public');
         }
@@ -78,7 +76,6 @@ class UserProfileController extends Controller
 
         return response()->json([
             'message' => 'Profiel succesvol bijgewerkt.',
-            // Only de velden die je wilt teruggeven
             'user' => $user->only(['id', 'username', 'profile_image', 'banner_image']),
         ]);
     }
