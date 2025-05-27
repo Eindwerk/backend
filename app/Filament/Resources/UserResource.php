@@ -60,9 +60,6 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('role')->label('Rol')->badge(),
                 Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
             ])
-            ->actions([
-                Tables\Actions\DeleteAction::make()->visible(fn() => Auth::user()->role !== 'user'),
-            ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
@@ -73,6 +70,7 @@ class UserResource extends Resource
         return [
             'index' => Pages\ListUsers::route('/'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
+            'invite' => Pages\InviteAdmin::route('/invite'),
         ];
     }
 
@@ -104,5 +102,10 @@ class UserResource extends Resource
     public static function canDeleteAny(): bool
     {
         return static::canDelete(null);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Auth::check() && Auth::user()?->role === 'super_admin';
     }
 }
