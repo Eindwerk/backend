@@ -3,9 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Gate;
-use App\Models\User;
+use Illuminate\Routing\UrlGenerator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,11 +12,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Hier kun je custom bindings of service-registraties toevoegen.
+        //
     }
 
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void {}
+    public function boot(UrlGenerator $url)
+    {
+        if (env('APP_ENV') !== 'local') {
+            $url->forceScheme('https');
+        }
+    }
 }
