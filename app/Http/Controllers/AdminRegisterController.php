@@ -32,6 +32,6 @@ class AdminRegisterController extends Controller
 
         Log::info('Gebruiker geüpdatet?', ['result' => $updated]);
 
-        return redirect('/admin/login')->with('success', 'Wachtwoord ingesteld. Je kan nu inloggen.');
+        return redirect('/login')->with('success', 'Wachtwoord ingesteld. Je kan nu inloggen.');
     }
 }
