@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\{
     UserProfileController,
     FollowController
 };
+use App\Http\Middleware\ApiKeyMiddleware;
 
 // ----------------------------
 // 🔐 AUTHENTICATIE
@@ -108,22 +109,22 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
 // 👤 PROFIEL
 // ----------------------------
 
-Route::middleware('auth:sanctum')->post('/users/profile', [UserProfileController::class, 'update']);
+Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->post('/users/profile', [UserProfileController::class, 'update']);
 
 
 // ----------------------------
 // ➕ POST routes voor updates (i.p.v. PATCH voor form-data)
 // ----------------------------
 
-Route::middleware('auth:sanctum')->post('/stadiums/{stadium}', [StadiumController::class, 'update']);
-Route::middleware('auth:sanctum')->post('/teams/{team}', [TeamController::class, 'update']);
+Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->post('/stadiums/{stadium}', [StadiumController::class, 'update']);
+Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->post('/teams/{team}', [TeamController::class, 'update']);
 
 
 // ----------------------------
 // 🔁 FOLLOW SYSTEM
 // ----------------------------
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () {
     Route::post('/follow', [FollowController::class, 'follow']);
     Route::delete('/unfollow', [FollowController::class, 'unfollow']);
     Route::get('/following', [FollowController::class, 'index']);
@@ -132,10 +133,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // ----------------------------
 // 🔐 BEVEILIGDE API RESOURCES
-// Enkel voor geverifieerde gebruikers
+// Sanctum + Email verified + geldige API key vereist
 // ----------------------------
 
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified', ApiKeyMiddleware::class])->group(function () {
     Route::apiResource('stadiums', StadiumController::class);
     Route::apiResource('teams', TeamController::class);
     Route::apiResource('games', GameController::class);
