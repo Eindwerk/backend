@@ -13,11 +13,6 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * De velden die massaal toegekend mogen worden.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -29,21 +24,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'banner_image',
     ];
 
-    /**
-     * Verberg deze velden bij serialisatie.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Typeconversies van attributen.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -62,7 +47,6 @@ class User extends Authenticatable implements MustVerifyEmail
             $user->id = random_int(1000000000, 9999999999);
         });
     }
-
 
     public function visits(): HasMany
     {
@@ -103,7 +87,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(\App\Models\Follow::class);
     }
-
 
     public function followedTeams()
     {
