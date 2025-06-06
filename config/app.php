@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    |
+    | This value is used when generating links that should point to your
+    | frontend application (bijv. voor e-mailverificatie). Stel dit in
+    | in je .env via APP_FRONTEND_URL.
+    |
+    */
+
+    'frontend_url' => env('APP_FRONTEND_URL', 'https://groundpass.be'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
@@ -95,9 +108,9 @@ return [
     |
     */
 
-    'cipher' => 'AES-256-CBC',
-
     'key' => env('APP_KEY'),
+
+    'cipher' => 'AES-256-CBC',
 
     'previous_keys' => [
         ...array_filter(
