@@ -27,9 +27,9 @@ class FrontendVerifyEmail extends Notification
         // Base-URL van je frontend, in .env ingesteld als APP_FRONTEND_URL
         $frontendUrl = config('app.frontend_url', 'https://groundpass.be');
 
-        // Bouw de link naar Next.js/sign-in met query-string:
+        // Bouw de link naar Next.js/email-confirmed met query-string:
         $url = $frontendUrl
-            . '/sign-in?verify_token=' . $this->plainToken
+            . '/email-confirmed?verify_token=' . $this->plainToken
             . '&email=' . urlencode($notifiable->email);
 
         return (new MailMessage)
