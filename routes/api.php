@@ -86,9 +86,13 @@ Route::post('/login', function (Request $request) {
     //     return response()->json(['message' => 'Bevestig eerst je e-mailadres.'], 403);
     // }
 
+    // Bepaal of de e-mail al geverifieerd is
+    $isVerified = (bool) $user->hasVerifiedEmail();
+
     return response()->json([
-        'token' => $user->createToken('api-token')->plainTextToken,
-        'user'  => $user,
+        'token'    => $user->createToken('api-token')->plainTextToken,
+        'user'     => $user,
+        'verified' => $isVerified,
     ]);
 });
 
