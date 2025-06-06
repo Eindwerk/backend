@@ -21,5 +21,5 @@ Route::post('/logout', function (Request $request) {
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect('/admin/login'); // Of andere redirect
+    return redirect('/login');
 })->name('logout');
