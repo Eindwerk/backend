@@ -22,7 +22,6 @@ use App\Http\Controllers\{
     NotificationController
 };
 use App\Http\Middleware\ApiKeyMiddleware;
-
 /*
 |--------------------------------------------------------------------------
 | REGISTRATIE
@@ -48,7 +47,7 @@ Route::post('/register', function (Request $request) {
         'password' => bcrypt($request->password),
     ]);
 
-    // Trigger onze aangepaste notificatie (genereert token en stuurt e-mail)
+    // Trigger onze aangepaste notificatie (FrontEndVerifyEmail) om token te genereren en mail te sturen
     $user->sendEmailVerificationNotification();
 
     return response()->json([
@@ -66,7 +65,7 @@ Route::post('/register', function (Request $request) {
 | We laten nu ook ongeverifieerde gebruikers inloggen, zodat de frontend
 | na het inloggen alsnog de e-mail kan verifiëren via het nieuwe endpoint.
 | Zodra de e-mail geverifieerd is, kunnen de frontend‐protected routes
-| (middlware ’verified’) wél gebruikt worden.
+| (middleware ’verified’) wél gebruikt worden.
 |
 */
 Route::post('/login', function (Request $request) {
@@ -78,15 +77,14 @@ Route::post('/login', function (Request $request) {
     $user = User::where('email', $request->email)->first();
 
     if (! $user || ! Hash::check($request->password, $user->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
+        return response()->json(['message' => 'Invalid credentials.'], 401);
     }
 
-    // ❌ Haal de volgende check weg, zodat ongeverifieerde gebruikers wél kunnen inloggen:
+    // ❌ We halen de “bladcheck op hasVerifiedEmail” weg, zodat ongeverifieerden óók inloggen
     // if (! $user->hasVerifiedEmail()) {
     //     return response()->json(['message' => 'Bevestig eerst je e-mailadres.'], 403);
     // }
 
-    // Bepaal of de e-mail al geverifieerd is
     $isVerified = (bool) $user->hasVerifiedEmail();
 
     return response()->json([
@@ -98,7 +96,7 @@ Route::post('/login', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| LOGOUT & "ME"
+| LOGOUT & “ME”
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
@@ -110,15 +108,16 @@ Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->
 
 /*
 |--------------------------------------------------------------------------
-| E-MAILVERIFICATIE: TOKEN-BASIS FLOW
+| E-MAILVERIFICATIE: TOKEN-BASIS FLOW (publiek endpoint)
 |--------------------------------------------------------------------------
 |
-| 1) Frontend roept /email/verification-notification aan om opnieuw token te sturen.
-| 2) Nieuw endpoint POST /email/verify: controleert de token en markeert e-mail.
+| 1) Frontend stuurt de gebruiker per e-mail naar /email-confirmed?verify_token=…&email=…
+| 2) Achter de schermen roept de frontend (server-action) dit endpoint aan en markeert
+|    de e-mail als geverifieerd, óók zonder dat er een Sanctum-token meegestuurd wordt.
 |
 */
 
-/** 1) Resend Verification-mail (blijf dit endpoint behouden) */
+/** 1) Resend Verification‐mail (blijft wel auth:sanctum) */
 Route::middleware(['auth:sanctum', 'throttle:6,1'])
     ->post('/email/verification-notification', function (Request $request) {
         if ($request->user()->hasVerifiedEmail()) {
@@ -129,20 +128,31 @@ Route::middleware(['auth:sanctum', 'throttle:6,1'])
         return response()->json(['message' => 'Verificatiemail opnieuw verzonden.']);
     });
 
-/** 2) Nieuw endpoint voor front-driven verificatie */
-Route::middleware(['auth:sanctum'])->post('/email/verify', function (Request $request) {
+/** 2) PUBLIEK ENDPOINT VOOR FRONTEND‐GEBASEERDE EMAIL‐VERIFICATIE */
+Route::post('/email/verify', function (Request $request) {
+    // Valideer dat de frontend exactly “verify_token” meestuurt
     $request->validate([
         'verify_token' => 'required|string',
+        'email'        => 'required|email',
     ]);
 
-    /** @var User $user */
-    $user = $request->user();
-
-    if ($user->hasVerifiedEmail()) {
-        return response()->json(['message' => 'E-mailadres is al geverifieerd.'], 200);
+    // Zoek gebruiker op basis van e-mailadres (die moet bestaan, anders 404)
+    $user = User::where('email', $request->email)->first();
+    if (! $user) {
+        return response()->json([
+            'message' => 'Gebruiker niet gevonden.',
+        ], 404);
     }
 
-    // Her‐hash de plain token en vergelijk met wat in de DB staat
+    // Als al geverifieerd, laten we dat weten
+    if ($user->hasVerifiedEmail()) {
+        return response()->json([
+            'message' => 'E-mailadres is al geverifieerd.',
+        ], 200);
+    }
+
+    // Vergelijk de meegegeven plain‐token met de hashed token in de DB
+    // We gaan ervan uit dat je bij registratie een HMAC‐hash opslaat in `email_verification_token`
     $hashed = hash_hmac('sha256', $request->verify_token, config('app.key'));
 
     if (
@@ -150,18 +160,23 @@ Route::middleware(['auth:sanctum'])->post('/email/verify', function (Request $re
         ! $user->email_verification_token_expires_at ||
         now()->greaterThan($user->email_verification_token_expires_at)
     ) {
-        return response()->json(['message' => 'Ongeldige of verlopen verificatietoken.'], 403);
+        return response()->json([
+            'message' => 'Ongeldige of verlopen verificatietoken.'
+        ], 403);
     }
 
-    // Alles klopt: zet e-mail als verified, wis de tokenvelden, sla op
+    // Markeer e-mail als geverifieerd en wis daarna de token‐velden
     $user->markEmailAsVerified();
     $user->email_verification_token = null;
     $user->email_verification_token_expires_at = null;
     $user->save();
 
+    // Laat Laravel het Verified‐event afvuren
     event(new Verified($user));
 
-    return response()->json(['message' => 'E-mailadres succesvol geverifieerd.'], 200);
+    return response()->json([
+        'message' => 'E-mailadres succesvol geverifieerd.',
+    ], 200);
 });
 
 /*
@@ -238,18 +253,18 @@ Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () 
 |
 */
 Route::middleware(['auth:sanctum', 'verified', ApiKeyMiddleware::class])->group(function () {
-    Route::apiResource('stadiums', StadiumController::class);
-    Route::apiResource('teams',    TeamController::class);
-    Route::apiResource('games',    GameController::class);
-    Route::apiResource('visits',   VisitController::class);
-    Route::apiResource('posts',    PostController::class);
+    Route::apiResource('stadiums',  StadiumController::class);
+    Route::apiResource('teams',     TeamController::class);
+    Route::apiResource('games',     GameController::class);
+    Route::apiResource('visits',    VisitController::class);
+    Route::apiResource('posts',     PostController::class);
 
-    Route::post('comments',                [CommentController::class, 'store']);
-    Route::delete('comments/{comment}',    [CommentController::class, 'destroy']);
+    Route::post('comments',                 [CommentController::class, 'store']);
+    Route::delete('comments/{comment}',     [CommentController::class, 'destroy']);
 
-    Route::post('likes',                   [LikeController::class, 'store']);
-    Route::delete('likes/{post_id}',       [LikeController::class, 'destroy']);
+    Route::post('likes',                    [LikeController::class, 'store']);
+    Route::delete('likes/{post_id}',        [LikeController::class, 'destroy']);
 
-    Route::get('notifications',            [NotificationController::class, 'index']);
+    Route::get('notifications',             [NotificationController::class, 'index']);
     Route::delete('notifications/{notification}', [NotificationController::class, 'destroy']);
 });
