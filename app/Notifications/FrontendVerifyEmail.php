@@ -2,15 +2,11 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class FrontendVerifyEmail extends Notification implements ShouldQueue
+class FrontendVerifyEmail extends Notification
 {
-    use Queueable;
-
     /**
      * De “platte” token die we via de e-mail-link meesturen.
      */
@@ -31,7 +27,7 @@ class FrontendVerifyEmail extends Notification implements ShouldQueue
         // Base-URL van je frontend, in .env ingesteld als APP_FRONTEND_URL
         $frontendUrl = config('app.frontend_url', 'https://groundpass.be');
 
-        // Bouw de link naar de Next.js-sign-in met query-string:
+        // Bouw de link naar Next.js/sign-in met query-string:
         $url = $frontendUrl
             . '/sign-in?verify_token=' . $this->plainToken
             . '&email=' . urlencode($notifiable->email);
