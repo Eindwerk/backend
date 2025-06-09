@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminRegisterController;
-use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\File;
 
 // GET shows the password form, with signed validation
@@ -25,7 +24,7 @@ Route::get('/storage/{path}', function ($path) {
     $mime = File::mimeType($file);
 
     return response()->file($file, [
-        'Content-Type'  => $mime,
+        'Content-Type' => $mime,
         'Cache-Control' => 'public, max-age=86400',
         'X-Content-Type-Options' => 'nosniff',
     ]);
