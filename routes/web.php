@@ -21,5 +21,10 @@ Route::get('/storage/{path}', function ($path) {
         abort(404);
     }
 
-    return Response::file($file);
+    $mime = File::mimeType($file);
+
+    return Response::file($file, [
+        'Content-Type' => $mime,
+        'Cache-Control' => 'max-age=86400, public',
+    ]);
 })->where('path', '.*');
