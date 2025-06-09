@@ -14,6 +14,7 @@ Route::get('/register/{user}', [AdminRegisterController::class, 'showForm'])
 Route::post('/register/{user}', [AdminRegisterController::class, 'storePassword'])
     ->name('admin.register.submit');
 
+
 Route::get('/storage/{path}', function ($path) {
     $file = storage_path('app/public/' . $path);
 
@@ -23,8 +24,9 @@ Route::get('/storage/{path}', function ($path) {
 
     $mime = File::mimeType($file);
 
-    return Response::file($file, [
-        'Content-Type' => $mime,
-        'Cache-Control' => 'max-age=86400, public',
+    return response()->file($file, [
+        'Content-Type'  => $mime,
+        'Cache-Control' => 'public, max-age=86400',
+        'X-Content-Type-Options' => 'nosniff',
     ]);
 })->where('path', '.*');
