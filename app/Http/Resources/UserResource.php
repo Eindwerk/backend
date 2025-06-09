@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @OA\Schema(
@@ -35,10 +36,30 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'username' => $this->username,
             'email' => $this->email,
-            'profile_image' => $this->profile_image ? asset('storage/' . $this->profile_image) : null,
-            'banner_image' => $this->banner_image ? asset('storage/' . $this->banner_image) : null,
+            'profile_image' => $this->getProfileImageUrl(),
+            'banner_image' => $this->getBannerImageUrl(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    private function getProfileImageUrl(): ?string
+    {
+        if ($this->profile_image && Storage::disk('public')->exists($this->profile_image)) {
+            return asset('storage/' . $this->profile_image);
+        }
+
+        // Geef null terug of een fallback-afbeelding
+        return asset('storage/defaults/profile.jpg'); // ← pas dit aan of gebruik null
+    }
+
+    private function getBannerImageUrl(): ?string
+    {
+        if ($this->banner_image && Storage::disk('public')->exists($this->banner_image)) {
+            return asset('storage/' . $this->banner_image);
+        }
+
+        // Geef null terug of een fallback-afbeelding
+        return asset('storage/defaults/banner.jpg'); // ← pas dit aan of gebruik null
     }
 }

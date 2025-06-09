@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateUserProfileRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,7 +30,7 @@ use Illuminate\Support\Facades\Storage;
  *         description="Profiel succesvol bijgewerkt",
  *         @OA\JsonContent(
  *             @OA\Property(property="message", type="string", example="Profiel succesvol bijgewerkt."),
- *             @OA\Property(property="user", type="object")
+ *             @OA\Property(property="user", ref="#/components/schemas/User")
  *         )
  *     ),
  *     @OA\Response(response=422, description="Validatiefout"),
@@ -58,8 +59,11 @@ class UserProfileController extends Controller
                 Storage::disk('public')->delete($user->profile_image);
             }
 
-            $user->profile_image = $request->file('profile_image')
-                ->store('users/profile-image', 'public');
+            $filename = $request->file('profile_image')->hashName(); // unieke onvoorspelbare naam
+            $path = $request->file('profile_image')
+                ->storeAs('users/profile-image', $filename, 'public');
+
+            $user->profile_image = $path;
         }
 
         // Bannerafbeelding bijwerken
@@ -68,15 +72,18 @@ class UserProfileController extends Controller
                 Storage::disk('public')->delete($user->banner_image);
             }
 
-            $user->banner_image = $request->file('banner_image')
-                ->store('users/banner-image', 'public');
+            $filename = $request->file('banner_image')->hashName();
+            $path = $request->file('banner_image')
+                ->storeAs('users/banner-image', $filename, 'public');
+
+            $user->banner_image = $path;
         }
 
         $user->save();
 
         return response()->json([
             'message' => 'Profiel succesvol bijgewerkt.',
-            'user' => $user->only(['id', 'username', 'profile_image', 'banner_image']),
+            'user' => new UserResource($user),
         ]);
     }
 }
