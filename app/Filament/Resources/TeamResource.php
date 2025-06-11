@@ -9,8 +9,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Components\FileUpload;
 
 class TeamResource extends Resource
 {
@@ -39,7 +39,7 @@ class TeamResource extends Resource
                 Forms\Components\FileUpload::make('logo_url')
                     ->label('Logo')
                     ->disk('public')
-                    ->directory('teams/profile-image')
+                    ->directory('teams')
                     ->image()
                     ->imagePreviewHeight(100)
                     ->visibility('public')
@@ -55,7 +55,10 @@ class TeamResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('logo_url')
                     ->label('Logo')
-                    ->disk('public'),
+                    ->disk('public')
+                    ->visibility('public')
+                    ->height(50)
+                    ->circular(),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
@@ -76,6 +79,11 @@ class TeamResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
     public static function getPages(): array
     {
         return [
@@ -83,35 +91,5 @@ class TeamResource extends Resource
             'create' => Pages\CreateTeam::route('/create'),
             'edit' => Pages\EditTeam::route('/{record}/edit'),
         ];
-    }
-
-    public static function canViewAny(): bool
-    {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
-    }
-
-    public static function canView($record): bool
-    {
-        return static::canViewAny();
-    }
-
-    public static function canCreate(): bool
-    {
-        return Auth::check() && Auth::user()->role === 'super_admin';
-    }
-
-    public static function canEdit($record): bool
-    {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
-    }
-
-    public static function canDelete($record): bool
-    {
-        return Auth::check() && Auth::user()->role === 'super_admin';
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canDelete(null);
     }
 }

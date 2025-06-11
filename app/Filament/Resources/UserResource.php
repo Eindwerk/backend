@@ -27,10 +27,13 @@ class UserResource extends Resource
             ->schema([
                 FileUpload::make('profile_image')
                     ->label('Profielfoto')
+                    ->disk('public')
+                    ->directory('uploads/users/profile-image')
                     ->image()
-                    ->directory('users')
                     ->imageEditor()
-                    ->imagePreviewHeight('150')
+                    ->imagePreviewHeight(150)
+                    ->preserveFilenames()
+                    ->visibility('public')
                     ->maxSize(2048),
 
                 Forms\Components\TextInput::make('name')
