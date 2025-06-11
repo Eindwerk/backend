@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Filters\SelectFilter;
 
 class TeamResource extends Resource
 {
@@ -57,6 +58,12 @@ class TeamResource extends Resource
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
                 Tables\Columns\TextColumn::make('league.name')->label('Competitie')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('league_id')
+                    ->label('Competitie')
+                    ->relationship('league', 'name')
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
