@@ -11,6 +11,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\ImageColumn;
+use Illuminate\Container\Attributes\Log;
 
 class UserResource extends Resource
 {
@@ -54,9 +56,9 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\ImageColumn::make('profile_image')
+                ImageColumn::make('profile_image')
                     ->label('Profielfoto')
-                    ->disk('public')
+                    ->url(fn($record) => asset($record->profile_image))
                     ->circular(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
                 Tables\Columns\TextColumn::make('email')->label('E-mailadres')->searchable(),
