@@ -38,9 +38,12 @@ class TeamResource extends Resource
 
                 Forms\Components\FileUpload::make('logo_url')
                     ->label('Logo')
-                    ->directory('teams')
+                    ->disk('public')
+                    ->directory('teams/profile-image')
                     ->image()
-                    ->imagePreviewHeight('100')
+                    ->imagePreviewHeight(100)
+                    ->visibility('public')
+                    ->preserveFilenames()
                     ->maxSize(1024)
                     ->nullable(),
             ]);
