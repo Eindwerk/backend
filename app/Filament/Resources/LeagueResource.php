@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TeamResource\Pages;
-use App\Models\Team;
+use App\Filament\Resources\LeagueResource\Pages;
+use App\Models\League;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -11,55 +11,37 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
-class TeamResource extends Resource
+class LeagueResource extends Resource
 {
-    protected static ?string $model = Team::class;
+    protected static ?string $model = League::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Teams';
-    protected static ?string $pluralLabel = 'Teams';
+    protected static ?string $navigationIcon = 'heroicon-o-trophy';
+    protected static ?string $navigationLabel = 'Competities';
+    protected static ?string $pluralModelLabel = 'Competities';
     protected static ?string $navigationGroup = 'Beheer';
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Naam')
-                    ->required()
-                    ->maxLength(255),
-
-                Forms\Components\Select::make('league_id')
-                    ->label('Competitie')
-                    ->relationship('league', 'name')
-                    ->required()
-                    ->searchable(),
-
-                Forms\Components\FileUpload::make('logo_url')
-                    ->label('Logo')
-                    ->directory('teams')
-                    ->image()
-                    ->imagePreviewHeight('100')
-                    ->maxSize(1024)
-                    ->nullable(),
-            ]);
+        return $form->schema([
+            Forms\Components\TextInput::make('name')
+                ->label('Naam')
+                ->required()
+                ->unique(ignoreRecord: true)
+                ->maxLength(255),
+        ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('logo_url')
-                    ->label('Logo')
-                    ->disk('public'),
-
                 Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
-                Tables\Columns\TextColumn::make('league.name')->label('Competitie')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('name')->label('Naam')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -69,9 +51,9 @@ class TeamResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTeams::route('/'),
-            'create' => Pages\CreateTeam::route('/create'),
-            'edit' => Pages\EditTeam::route('/{record}/edit'),
+            'index' => Pages\ListLeagues::route('/'),
+            'create' => Pages\CreateLeague::route('/create'),
+            'edit' => Pages\EditLeague::route('/{record}/edit'),
         ];
     }
 

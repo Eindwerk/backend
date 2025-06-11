@@ -37,6 +37,13 @@ class PostResource extends JsonResource
             'game' => new GameResource($this->whenLoaded('game')),
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'content' => $this->content,
+            'image' => $this->image,
+
+            // Dynamisch gegenereerde titel
+            'title' => $this->game && $this->game->relationLoaded('homeTeam') && $this->game->relationLoaded('awayTeam') && $this->game->relationLoaded('stadium')
+                ? $this->game->homeTeam->name . ' vs ' . $this->game->awayTeam->name . ' – ' . $this->game->stadium->name
+                : null,
+
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

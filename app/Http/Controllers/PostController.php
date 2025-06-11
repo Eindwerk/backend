@@ -32,7 +32,13 @@ class PostController extends Controller
      */
     public function index(): JsonResponse
     {
-        $posts = Post::with(['game', 'comments'])->latest()->get();
+        $posts = Post::with([
+            'game.homeTeam',
+            'game.awayTeam',
+            'game.stadium',
+            'comments'
+        ])->latest()->get();
+
         return response()->json(PostResource::collection($posts));
     }
 
@@ -65,7 +71,15 @@ class PostController extends Controller
             ...$request->validated(),
         ]);
 
-        return response()->json(new PostResource($post->load(['game', 'comments'])), 201);
+        return response()->json(
+            new PostResource($post->load([
+                'game.homeTeam',
+                'game.awayTeam',
+                'game.stadium',
+                'comments',
+            ])),
+            201
+        );
     }
 
     /**
@@ -92,7 +106,14 @@ class PostController extends Controller
      */
     public function show(Post $post): JsonResponse
     {
-        return response()->json(new PostResource($post->load(['game', 'comments'])));
+        return response()->json(
+            new PostResource($post->load([
+                'game.homeTeam',
+                'game.awayTeam',
+                'game.stadium',
+                'comments',
+            ]))
+        );
     }
 
     /**
@@ -129,7 +150,14 @@ class PostController extends Controller
         $this->authorizePost($post);
         $post->update($request->validated());
 
-        return response()->json(new PostResource($post->load(['game', 'comments'])));
+        return response()->json(
+            new PostResource($post->load([
+                'game.homeTeam',
+                'game.awayTeam',
+                'game.stadium',
+                'comments',
+            ]))
+        );
     }
 
     /**

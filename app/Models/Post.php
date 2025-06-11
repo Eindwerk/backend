@@ -11,15 +11,10 @@ class Post extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'game_id',
-        'content',
+        'image',
     ];
 
     /**
@@ -31,7 +26,7 @@ class Post extends Model
     }
 
     /**
-     * The game the post is about.
+     * The game this post refers to.
      */
     public function game(): BelongsTo
     {
@@ -52,5 +47,19 @@ class Post extends Model
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
+    }
+
+    /**
+     * Computed title: HomeTeam vs AwayTeam @ Stadium
+     */
+    public function getTitleAttribute(): string
+    {
+        $this->loadMissing('game.homeTeam', 'game.awayTeam', 'game.stadium');
+
+        $home = $this->game?->homeTeam?->name ?? 'Home Team';
+        $away = $this->game?->awayTeam?->name ?? 'Away Team';
+        $stadium = $this->game?->stadium?->name ?? 'Stadium';
+
+        return "$home vs $away @ $stadium";
     }
 }
