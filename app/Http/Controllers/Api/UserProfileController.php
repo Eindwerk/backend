@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateUserProfileRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 /**
  * @OA\Post(
@@ -39,10 +40,6 @@ use Illuminate\Support\Facades\Storage;
  */
 class UserProfileController extends Controller
 {
-    /**
-     * POST /api/users/profile
-     * Content-Type: multipart/form-data
-     */
     public function update(UpdateUserProfileRequest $request): JsonResponse
     {
         $user = $request->user();
@@ -53,29 +50,30 @@ class UserProfileController extends Controller
             $user->username = $data['username'];
         }
 
+        // Zorg dat de folders bestaan
+        File::ensureDirectoryExists(public_path('uploads/users/profile-image'));
+        File::ensureDirectoryExists(public_path('uploads/users/banner-image'));
+
         // Profielafbeelding bijwerken
         if ($request->hasFile('profile_image')) {
-            // Oude afbeelding verwijderen
-            if ($user->profile_image) {
-                Storage::disk('public')->delete($user->profile_image);
+            if ($user->profile_image && file_exists(public_path($user->profile_image))) {
+                unlink(public_path($user->profile_image));
             }
 
-            $path = $request->file('profile_image')
-                ->store('users/profile-image', 'public');
-
-            $user->profile_image = $path;
+            $filename = Str::random(40) . '.' . $request->file('profile_image')->getClientOriginalExtension();
+            $request->file('profile_image')->move(public_path('uploads/users/profile-image'), $filename);
+            $user->profile_image = 'uploads/users/profile-image/' . $filename;
         }
 
         // Bannerafbeelding bijwerken
         if ($request->hasFile('banner_image')) {
-            if ($user->banner_image) {
-                Storage::disk('public')->delete($user->banner_image);
+            if ($user->banner_image && file_exists(public_path($user->banner_image))) {
+                unlink(public_path($user->banner_image));
             }
 
-            $path = $request->file('banner_image')
-                ->store('users/banner-image', 'public');
-
-            $user->banner_image = $path;
+            $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
+            $request->file('banner_image')->move(public_path('uploads/users/banner-image'), $filename);
+            $user->banner_image = 'uploads/users/banner-image/' . $filename;
         }
 
         $user->save();
