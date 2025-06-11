@@ -17,8 +17,8 @@ class StadiumRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'capacity' => ['nullable', 'integer'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'banner_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'banner_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
         ];
     }
 }

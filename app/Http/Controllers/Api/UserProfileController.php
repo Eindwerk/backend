@@ -48,20 +48,20 @@ class UserProfileController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        // Username bijwerken
+        // Gebruikersnaam bijwerken
         if (isset($data['username'])) {
             $user->username = $data['username'];
         }
 
         // Profielafbeelding bijwerken
         if ($request->hasFile('profile_image')) {
+            // Oude afbeelding verwijderen
             if ($user->profile_image) {
                 Storage::disk('public')->delete($user->profile_image);
             }
 
-            $filename = $request->file('profile_image')->hashName(); // unieke onvoorspelbare naam
             $path = $request->file('profile_image')
-                ->storeAs('users/profile-image', $filename, 'public');
+                ->store('users/profile-image', 'public');
 
             $user->profile_image = $path;
         }
@@ -72,9 +72,8 @@ class UserProfileController extends Controller
                 Storage::disk('public')->delete($user->banner_image);
             }
 
-            $filename = $request->file('banner_image')->hashName();
             $path = $request->file('banner_image')
-                ->storeAs('users/banner-image', $filename, 'public');
+                ->store('users/banner-image', 'public');
 
             $user->banner_image = $path;
         }

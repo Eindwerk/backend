@@ -43,8 +43,8 @@ class TeamController extends Controller
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 required={"name", "league"},
-     *                 @OA\Property(property="name", type="string", example="Borussia Dortmund"),
-     *                 @OA\Property(property="league", type="string", example="Bundesliga"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="league", type="string"),
      *                 @OA\Property(property="logo_url", type="string", format="binary"),
      *                 @OA\Property(property="banner_image", type="string", format="binary")
      *             )
@@ -59,11 +59,13 @@ class TeamController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('logo_url')) {
-            $data['logo_url'] = $request->file('logo_url')->store('teams/profile-image', 'public');
+            $filename = $request->file('logo_url')->hashName();
+            $data['logo_url'] = $request->file('logo_url')->storeAs('teams/profile-image', $filename, 'public');
         }
 
         if ($request->hasFile('banner_image')) {
-            $data['banner_image'] = $request->file('banner_image')->store('teams/banner-image', 'public');
+            $filename = $request->file('banner_image')->hashName();
+            $data['banner_image'] = $request->file('banner_image')->storeAs('teams/banner-image', $filename, 'public');
         }
 
         $team = Team::create($data);
@@ -77,10 +79,10 @@ class TeamController extends Controller
      *     summary="Toon een team",
      *     tags={"Teams"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Teamdetails", @OA\JsonContent(ref="#/components/schemas/Team")),
-     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
-     *     @OA\Response(response=404, description="Niet gevonden")
+     *     @OA\Response(response=404, description="Niet gevonden"),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function show(Team $team): JsonResponse
@@ -94,9 +96,9 @@ class TeamController extends Controller
      *     summary="Update een team (PATCH)",
      *     tags={"Teams"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(
-     *         required=true,
+     *         required=false,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
@@ -107,7 +109,8 @@ class TeamController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Team geüpdatet", @OA\JsonContent(ref="#/components/schemas/Team"))
+     *     @OA\Response(response=200, description="Team geüpdatet", @OA\JsonContent(ref="#/components/schemas/Team")),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      * 
      * @OA\Post(
@@ -115,9 +118,9 @@ class TeamController extends Controller
      *     summary="Update een team (POST alternatief)",
      *     tags={"Teams"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(
-     *         required=true,
+     *         required=false,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
@@ -128,7 +131,8 @@ class TeamController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Team geüpdatet", @OA\JsonContent(ref="#/components/schemas/Team"))
+     *     @OA\Response(response=200, description="Team geüpdatet", @OA\JsonContent(ref="#/components/schemas/Team")),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function update(TeamRequest $request, Team $team): JsonResponse
@@ -136,17 +140,19 @@ class TeamController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('logo_url')) {
-            if ($team->logo_url && Storage::disk('public')->exists($team->logo_url)) {
+            if ($team->logo_url) {
                 Storage::disk('public')->delete($team->logo_url);
             }
-            $data['logo_url'] = $request->file('logo_url')->store('teams/profile-image', 'public');
+            $filename = $request->file('logo_url')->hashName();
+            $data['logo_url'] = $request->file('logo_url')->storeAs('teams/profile-image', $filename, 'public');
         }
 
         if ($request->hasFile('banner_image')) {
-            if ($team->banner_image && Storage::disk('public')->exists($team->banner_image)) {
+            if ($team->banner_image) {
                 Storage::disk('public')->delete($team->banner_image);
             }
-            $data['banner_image'] = $request->file('banner_image')->store('teams/banner-image', 'public');
+            $filename = $request->file('banner_image')->hashName();
+            $data['banner_image'] = $request->file('banner_image')->storeAs('teams/banner-image', $filename, 'public');
         }
 
         $team->update($data);
@@ -160,17 +166,18 @@ class TeamController extends Controller
      *     summary="Verwijder een team",
      *     tags={"Teams"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
-     *     @OA\Response(response=204, description="Team verwijderd")
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=204, description="Team verwijderd"),
+     *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
     public function destroy(Team $team): JsonResponse
     {
-        if ($team->logo_url && Storage::disk('public')->exists($team->logo_url)) {
+        if ($team->logo_url) {
             Storage::disk('public')->delete($team->logo_url);
         }
 
-        if ($team->banner_image && Storage::disk('public')->exists($team->banner_image)) {
+        if ($team->banner_image) {
             Storage::disk('public')->delete($team->banner_image);
         }
 

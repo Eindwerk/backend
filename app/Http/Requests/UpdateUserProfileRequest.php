@@ -16,8 +16,8 @@ class UpdateUserProfileRequest extends FormRequest
     {
         return [
             'username'      => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
-            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'banner_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:4096'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:8192'],
+            'banner_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:15360'],
         ];
     }
 }

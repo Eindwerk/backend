@@ -36,8 +36,14 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'username' => $this->username,
             'email' => $this->email,
-            'profile_image' => $this->getProfileImageUrl(),
-            'banner_image' => $this->getBannerImageUrl(),
+            'role' => $this->role,
+            'profile_image' => $this->profile_image
+                ? asset('storage/' . $this->profile_image)
+                : null,
+            'banner_image' => $this->banner_image
+                ? asset('storage/' . $this->banner_image)
+                : null,
+            'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

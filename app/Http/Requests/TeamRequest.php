@@ -23,8 +23,8 @@ class TeamRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'logo_url' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'banner_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'logo_url' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'banner_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
             'league' => ['required', 'string', 'max:255'],
         ];
     }
