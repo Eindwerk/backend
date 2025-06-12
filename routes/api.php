@@ -22,14 +22,11 @@ use App\Http\Controllers\{
     NotificationController
 };
 use App\Http\Middleware\ApiKeyMiddleware;
+
 /*
 |--------------------------------------------------------------------------
 | REGISTRATIE
 |--------------------------------------------------------------------------
-|
-| Bij registratie genereren we de gebruiker, slaan direct een Sanctum‐token
-| op en sturen een e-mail met onze FrontendVerifyEmail-notificatie.
-|
 */
 
 Route::post('/register', function (Request $request) {
@@ -47,7 +44,6 @@ Route::post('/register', function (Request $request) {
         'password' => bcrypt($request->password),
     ]);
 
-    // Trigger onze aangepaste notificatie (FrontEndVerifyEmail) om token te genereren en mail te sturen
     $user->sendEmailVerificationNotification();
 
     return response()->json([
@@ -61,12 +57,6 @@ Route::post('/register', function (Request $request) {
 |--------------------------------------------------------------------------
 | LOGIN
 |--------------------------------------------------------------------------
-|
-| We laten nu ook ongeverifieerde gebruikers inloggen, zodat de frontend
-| na het inloggen alsnog de e-mail kan verifiëren via het nieuwe endpoint.
-| Zodra de e-mail geverifieerd is, kunnen de frontend‐protected routes
-| (middleware ’verified’) wél gebruikt worden.
-|
 */
 Route::post('/login', function (Request $request) {
     $request->validate([
@@ -79,11 +69,6 @@ Route::post('/login', function (Request $request) {
     if (! $user || ! Hash::check($request->password, $user->password)) {
         return response()->json(['message' => 'Invalid credentials.'], 401);
     }
-
-    // ❌ We halen de “bladcheck op hasVerifiedEmail” weg, zodat ongeverifieerden óók inloggen
-    // if (! $user->hasVerifiedEmail()) {
-    //     return response()->json(['message' => 'Bevestig eerst je e-mailadres.'], 403);
-    // }
 
     $isVerified = (bool) $user->hasVerifiedEmail();
 
@@ -108,16 +93,9 @@ Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->
 
 /*
 |--------------------------------------------------------------------------
-| E-MAILVERIFICATIE: TOKEN-BASIS FLOW (publiek endpoint)
+| E-MAILVERIFICATIE: TOKEN-BASIS FLOW
 |--------------------------------------------------------------------------
-|
-| 1) Frontend stuurt de gebruiker per e-mail naar /email-confirmed?verify_token=…&email=…
-| 2) Achter de schermen roept de frontend (server-action) dit endpoint aan en markeert
-|    de e-mail als geverifieerd, óók zonder dat er een Sanctum-token meegestuurd wordt.
-|
 */
-
-/** 1) Resend Verification‐mail (blijft wel auth:sanctum) */
 Route::middleware(['auth:sanctum', 'throttle:6,1'])
     ->post('/email/verification-notification', function (Request $request) {
         if ($request->user()->hasVerifiedEmail()) {
@@ -128,31 +106,21 @@ Route::middleware(['auth:sanctum', 'throttle:6,1'])
         return response()->json(['message' => 'Verificatiemail opnieuw verzonden.']);
     });
 
-/** 2) PUBLIEK ENDPOINT VOOR FRONTEND‐GEBASEERDE EMAIL‐VERIFICATIE */
 Route::post('/email/verify', function (Request $request) {
-    // Valideer dat de frontend exactly “verify_token” meestuurt
     $request->validate([
         'verify_token' => 'required|string',
         'email'        => 'required|email',
     ]);
 
-    // Zoek gebruiker op basis van e-mailadres (die moet bestaan, anders 404)
     $user = User::where('email', $request->email)->first();
     if (! $user) {
-        return response()->json([
-            'message' => 'Gebruiker niet gevonden.',
-        ], 404);
+        return response()->json(['message' => 'Gebruiker niet gevonden.'], 404);
     }
 
-    // Als al geverifieerd, laten we dat weten
     if ($user->hasVerifiedEmail()) {
-        return response()->json([
-            'message' => 'E-mailadres is al geverifieerd.',
-        ], 200);
+        return response()->json(['message' => 'E-mailadres is al geverifieerd.'], 200);
     }
 
-    // Vergelijk de meegegeven plain‐token met de hashed token in de DB
-    // We gaan ervan uit dat je bij registratie een HMAC‐hash opslaat in `email_verification_token`
     $hashed = hash_hmac('sha256', $request->verify_token, config('app.key'));
 
     if (
@@ -160,23 +128,17 @@ Route::post('/email/verify', function (Request $request) {
         ! $user->email_verification_token_expires_at ||
         now()->greaterThan($user->email_verification_token_expires_at)
     ) {
-        return response()->json([
-            'message' => 'Ongeldige of verlopen verificatietoken.'
-        ], 403);
+        return response()->json(['message' => 'Ongeldige of verlopen verificatietoken.'], 403);
     }
 
-    // Markeer e-mail als geverifieerd en wis daarna de token‐velden
     $user->markEmailAsVerified();
     $user->email_verification_token = null;
     $user->email_verification_token_expires_at = null;
     $user->save();
 
-    // Laat Laravel het Verified‐event afvuren
     event(new Verified($user));
 
-    return response()->json([
-        'message' => 'E-mailadres succesvol geverifieerd.',
-    ], 200);
+    return response()->json(['message' => 'E-mailadres succesvol geverifieerd.'], 200);
 });
 
 /*
@@ -247,12 +209,11 @@ Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () 
 |--------------------------------------------------------------------------
 | BEVEILIGDE API RESOURCES
 |--------------------------------------------------------------------------
-|
-| We blijven hier de ’verified’ middleware gebruiken, zodat alleen
-| gebruikers met een geverifieerd e-mailadres deze routes kunnen aanspreken.
-|
 */
 Route::middleware(['auth:sanctum', 'verified', ApiKeyMiddleware::class])->group(function () {
+    // Handmatige POST route voor form-data updates met _method=PATCH
+    Route::post('/teams/{team}', [TeamController::class, 'update']);
+
     Route::apiResource('stadiums',  StadiumController::class);
     Route::apiResource('teams',     TeamController::class);
     Route::apiResource('games',     GameController::class);
