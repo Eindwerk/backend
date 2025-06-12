@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StadiumRequest extends FormRequest
+class UpdateStadiumProfileRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,13 +14,13 @@ class StadiumRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'           => ['required', 'string', 'max:255'],
-            'team_id'        => ['required', 'exists:teams,id'],
+            'name'           => ['sometimes', 'string', 'max:255'],
+            'team_id'        => ['sometimes', 'exists:teams,id'],
             'profile_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'banner_image'   => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
-            'location'       => ['required', 'array'],
-            'location.latitude' => ['required', 'numeric'],
-            'location.altitude' => ['required', 'numeric'],
+            'location'       => ['sometimes', 'array'],
+            'location.latitude' => ['required_with:location', 'numeric'],
+            'location.altitude' => ['required_with:location', 'numeric'],
         ];
     }
 }

@@ -22,6 +22,7 @@ use App\Http\Controllers\{
     NotificationController
 };
 use App\Http\Middleware\ApiKeyMiddleware;
+use App\Notifications\ResetPasswordLink;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,7 +82,7 @@ Route::post('/login', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| LOGOUT & “ME”
+| LOGOUT & ME
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
@@ -93,7 +94,7 @@ Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->
 
 /*
 |--------------------------------------------------------------------------
-| E-MAILVERIFICATIE: TOKEN-BASIS FLOW
+| E-MAILVERIFICATIE
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'throttle:6,1'])
@@ -146,13 +147,10 @@ Route::post('/email/verify', function (Request $request) {
 | WACHTWOORD VERGETEN
 |--------------------------------------------------------------------------
 */
-
-use App\Notifications\ResetPasswordLink;
-
 Route::post('/forgot-password', function (Request $request) {
     $request->validate(['email' => 'required|email']);
 
-    $user = \App\Models\User::where('email', $request->email)->first();
+    $user = User::where('email', $request->email)->first();
     if (! $user) {
         return response()->json(['message' => 'Gebruiker niet gevonden.'], 404);
     }
@@ -165,9 +163,9 @@ Route::post('/forgot-password', function (Request $request) {
 
 Route::post('/reset-password', function (Request $request) {
     $request->validate([
-        'email'                 => 'required|email',
-        'token'                 => 'required',
-        'password'              => 'required|string|min:6|confirmed',
+        'email'    => 'required|email',
+        'token'    => 'required',
+        'password' => 'required|string|min:6|confirmed',
     ]);
 
     $status = Password::reset(
@@ -211,20 +209,28 @@ Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () 
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'verified', ApiKeyMiddleware::class])->group(function () {
-    Route::post('/teams/{team}', [TeamController::class, 'update']);
+    // Custom update routes
+    Route::post('/teams/{team}',    [TeamController::class, 'update']);
+    Route::post('/stadiums/{stadium}', [StadiumController::class, 'update']);
 
-    Route::apiResource('stadiums',  StadiumController::class);
-    Route::apiResource('teams',     TeamController::class);
-    Route::apiResource('games',     GameController::class);
-    Route::apiResource('visits',    VisitController::class);
-    Route::apiResource('posts',     PostController::class);
+    // Custom create routes
+    Route::post('/teams',    [TeamController::class, 'store']);
+    Route::post('/stadiums', [StadiumController::class, 'store']);
 
-    Route::post('comments',                 [CommentController::class, 'store']);
-    Route::delete('comments/{comment}',     [CommentController::class, 'destroy']);
+    // Resource routes zonder store/update
+    Route::apiResource('teams', TeamController::class)->except(['store', 'update']);
+    Route::apiResource('stadiums', StadiumController::class)->except(['store', 'update']);
 
-    Route::post('likes',                    [LikeController::class, 'store']);
-    Route::delete('likes/{post_id}',        [LikeController::class, 'destroy']);
+    Route::apiResource('games',  GameController::class);
+    Route::apiResource('visits', VisitController::class);
+    Route::apiResource('posts',  PostController::class);
 
-    Route::get('notifications',             [NotificationController::class, 'index']);
+    Route::post('comments',             [CommentController::class, 'store']);
+    Route::delete('comments/{comment}', [CommentController::class, 'destroy']);
+
+    Route::post('likes',                [LikeController::class, 'store']);
+    Route::delete('likes/{post_id}',    [LikeController::class, 'destroy']);
+
+    Route::get('notifications',         [NotificationController::class, 'index']);
     Route::delete('notifications/{notification}', [NotificationController::class, 'destroy']);
 });

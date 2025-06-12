@@ -9,7 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Filters\SelectFilter;
 
 class StadiumResource extends Resource
 {
@@ -29,31 +29,41 @@ class StadiumResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                Forms\Components\TextInput::make('city')
-                    ->label('Stad')
-                    ->required()
-                    ->maxLength(255),
-
-                Forms\Components\TextInput::make('capacity')
-                    ->label('Capaciteit')
-                    ->numeric()
+                Forms\Components\Select::make('team_id')
+                    ->label('Team')
+                    ->relationship('team', 'name')
+                    ->searchable()
                     ->required(),
 
-                Forms\Components\FileUpload::make('image_url')
-                    ->label('Afbeelding')
-                    ->directory('stadiums')
+                Forms\Components\FileUpload::make('profile_image')
+                    ->label('Logo')
+                    ->disk('public')
+                    ->directory('stadiums/profile-image')
                     ->image()
-                    ->imagePreviewHeight('100')
-                    ->maxSize(2048)
+                    ->imagePreviewHeight(100)
+                    ->visibility('public')
+                    ->preserveFilenames()
+                    ->maxSize(1024)
                     ->nullable(),
 
-                Forms\Components\TextInput::make('location.lat')
+                Forms\Components\FileUpload::make('banner_image')
+                    ->label('Banner')
+                    ->disk('public')
+                    ->directory('stadiums/banner-image')
+                    ->image()
+                    ->imagePreviewHeight(100)
+                    ->visibility('public')
+                    ->preserveFilenames()
+                    ->maxSize(4096)
+                    ->nullable(),
+
+                Forms\Components\TextInput::make('location.latitude')
                     ->label('Latitude')
                     ->numeric()
                     ->required(),
 
-                Forms\Components\TextInput::make('location.lng')
-                    ->label('Longitude')
+                Forms\Components\TextInput::make('location.altitude')
+                    ->label('Altitude')
                     ->numeric()
                     ->required(),
             ]);
@@ -63,15 +73,23 @@ class StadiumResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('image_url')
-                    ->label('Afbeelding')
-                    ->disk('public'),
+                Tables\Columns\ImageColumn::make('profile_image')
+                    ->label('Logo')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->height(50)
+                    ->circular(),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
-                Tables\Columns\TextColumn::make('city')->label('Stad')->searchable(),
-                Tables\Columns\TextColumn::make('capacity')->label('Capaciteit')->sortable(),
+                Tables\Columns\TextColumn::make('team.name')->label('Team')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('team_id')
+                    ->label('Team')
+                    ->relationship('team', 'name')
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -81,6 +99,11 @@ class StadiumResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
     public static function getPages(): array
     {
         return [
@@ -88,35 +111,5 @@ class StadiumResource extends Resource
             'create' => Pages\CreateStadium::route('/create'),
             'edit' => Pages\EditStadium::route('/{record}/edit'),
         ];
-    }
-
-    public static function canViewAny(): bool
-    {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
-    }
-
-    public static function canView($record): bool
-    {
-        return static::canViewAny();
-    }
-
-    public static function canCreate(): bool
-    {
-        return Auth::check() && Auth::user()->role === 'super_admin';
-    }
-
-    public static function canEdit($record): bool
-    {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
-    }
-
-    public static function canDelete($record): bool
-    {
-        return Auth::check() && Auth::user()->role === 'super_admin';
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canDelete(null);
     }
 }

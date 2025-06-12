@@ -5,16 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Stadium extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'city',
@@ -22,15 +18,17 @@ class Stadium extends Model
         'capacity',
         'location',
         'banner_image',
+        'team_id', // <- zorg dat deze kolom bestaat in DB
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'location' => 'array',
+    ];
+
+    protected $appends = [
+        'profile_image',      // van team.logo_url
+        'team_name',
+        'location_object',
     ];
 
     /**
@@ -41,8 +39,46 @@ class Stadium extends Model
         return $this->hasMany(Game::class);
     }
 
+    /**
+     * Followers (polymorphic)
+     */
     public function followers()
     {
         return $this->morphToMany(User::class, 'followable', 'follows');
+    }
+
+    /**
+     * Het team dat hier speelt.
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Profile image van het team (logo)
+     */
+    public function getProfileImageAttribute(): ?string
+    {
+        return $this->team?->logo_url;
+    }
+
+    /**
+     * Teamnaam
+     */
+    public function getTeamNameAttribute(): ?string
+    {
+        return $this->team?->name;
+    }
+
+    /**
+     * Nettere locatie output
+     */
+    public function getLocationObjectAttribute(): array
+    {
+        return [
+            'latitude' => $this->location['latitude'] ?? null,
+            'altitude' => $this->location['altitude'] ?? null,
+        ];
     }
 }
