@@ -2,16 +2,47 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class BundesligaStadiumSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
+        $stadiums = [
+            ['team_id' => 1,  'name' => 'WWK Arena',                      'latitude' => 48.32306, 'altitude' => 10.88611],
+            ['team_id' => 2,  'name' => 'Stadion An der Alten Försterei', 'latitude' => 52.45722, 'altitude' => 13.56806],
+            ['team_id' => 3,  'name' => 'Wohninvest Weserstadion',        'latitude' => 53.06680, 'altitude' => 8.83790],
+            ['team_id' => 4,  'name' => 'Signal Iduna Park',              'latitude' => 51.49260, 'altitude' => 7.45190],
+            ['team_id' => 5,  'name' => 'Deutsche Bank Park',             'latitude' => 50.06860, 'altitude' => 8.64550],
+            ['team_id' => 6,  'name' => 'Europa-Park Stadion',            'latitude' => 48.02160, 'altitude' => 7.82970],
+            ['team_id' => 7,  'name' => 'Volksparkstadion',               'latitude' => 53.58720, 'altitude' => 9.89860],
+            ['team_id' => 8,  'name' => 'Voith-Arena',                    'latitude' => 48.66850, 'altitude' => 10.13930],
+            ['team_id' => 9,  'name' => 'PreZero Arena',                  'latitude' => 50.28572, 'altitude' => 18.68603],
+            ['team_id' => 10, 'name' => 'RheinEnergieStadion',            'latitude' => 50.93350, 'altitude' => 6.87520],
+            ['team_id' => 11, 'name' => 'Red Bull Arena',                 'latitude' => 51.34580, 'altitude' => 12.34830],
+            ['team_id' => 12, 'name' => 'BayArena',                       'latitude' => 51.03820, 'altitude' => 7.00230],
+            ['team_id' => 13, 'name' => 'MEWA ARENA',                     'latitude' => 49.98390, 'altitude' => 8.22440],
+            ['team_id' => 14, 'name' => 'BORUSSIA-PARK',                  'latitude' => 51.17460, 'altitude' => 6.38550],
+            ['team_id' => 15, 'name' => 'Allianz Arena',                  'latitude' => 48.21880, 'altitude' => 11.62470],
+            ['team_id' => 16, 'name' => 'Millerntor-Stadion',             'latitude' => 53.55460, 'altitude' => 9.96780],
+            ['team_id' => 17, 'name' => 'MHPArena',                       'latitude' => 48.79230, 'altitude' => 9.23210],
+            ['team_id' => 18, 'name' => 'Volkswagen Arena',               'latitude' => 52.43270, 'altitude' => 10.80390],
+        ];
+
+        foreach ($stadiums as $stadium) {
+            DB::table('stadia')->insert([
+                'name'           => $stadium['name'],
+                'team_id'        => $stadium['team_id'],
+                'profile_image'  => null,
+                'banner_image'   => null,
+                'location'       => json_encode([
+                    'latitude' => $stadium['latitude'],
+                    'altitude' => $stadium['altitude'],
+                ]),
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ]);
+        }
     }
 }
