@@ -18,7 +18,7 @@ class Stadium extends Model
         'capacity',
         'location',
         'banner_image',
-        'team_id', // <- zorg dat deze kolom bestaat in DB
+        'team_id',
     ];
 
     protected $casts = [
@@ -26,7 +26,7 @@ class Stadium extends Model
     ];
 
     protected $appends = [
-        'profile_image',      // van team.logo_url
+        'profile_image',
         'team_name',
         'location_object',
     ];
