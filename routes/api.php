@@ -211,7 +211,6 @@ Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () 
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'verified', ApiKeyMiddleware::class])->group(function () {
-    // Handmatige POST route voor form-data updates met _method=PATCH
     Route::post('/teams/{team}', [TeamController::class, 'update']);
 
     Route::apiResource('stadiums',  StadiumController::class);

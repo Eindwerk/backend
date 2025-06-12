@@ -31,8 +31,8 @@ class TeamResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'league' => $this->league,
-            'logo_url' => $this->logo_url ? asset('storage/' . $this->logo_url) : null,
-            'banner_image' => $this->banner_image ? asset('storage/' . $this->banner_image) : null,
+            'logo_url' => $this->logo_url,
+            'banner_image' => $this->banner_image,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
