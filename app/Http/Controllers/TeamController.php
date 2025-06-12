@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateTeamProfileRequest;
 use App\Http\Resources\TeamResource;
 use App\Models\Team;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
@@ -28,16 +27,19 @@ class TeamController extends Controller
     {
         $data = $request->validated();
 
+        File::ensureDirectoryExists(public_path('uploads/teams/profile-image'));
+        File::ensureDirectoryExists(public_path('uploads/teams/banner-image'));
+
         if ($request->hasFile('logo_url')) {
             $filename = Str::random(40) . '.' . $request->file('logo_url')->getClientOriginalExtension();
-            $path = $request->file('logo_url')->storeAs('uploads/teams/profile-image', $filename, 'public');
-            $data['logo_url'] = 'storage/' . $path;
+            $request->file('logo_url')->move(public_path('uploads/teams/profile-image'), $filename);
+            $data['logo_url'] = 'uploads/teams/profile-image/' . $filename;
         }
 
         if ($request->hasFile('banner_image')) {
             $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
-            $path = $request->file('banner_image')->storeAs('uploads/teams/banner-image', $filename, 'public');
-            $data['banner_image'] = 'storage/' . $path;
+            $request->file('banner_image')->move(public_path('uploads/teams/banner-image'), $filename);
+            $data['banner_image'] = 'uploads/teams/banner-image/' . $filename;
         }
 
         $team = Team::create($data);
@@ -62,14 +64,17 @@ class TeamController extends Controller
             $team->league = $data['league'];
         }
 
+        File::ensureDirectoryExists(public_path('uploads/teams/profile-image'));
+        File::ensureDirectoryExists(public_path('uploads/teams/banner-image'));
+
         if ($request->hasFile('logo_url')) {
             if ($team->logo_url && file_exists(public_path($team->logo_url))) {
                 unlink(public_path($team->logo_url));
             }
 
             $filename = Str::random(40) . '.' . $request->file('logo_url')->getClientOriginalExtension();
-            $path = $request->file('logo_url')->storeAs('uploads/teams/profile-image', $filename, 'public');
-            $team->logo_url = 'storage/' . $path;
+            $request->file('logo_url')->move(public_path('uploads/teams/profile-image'), $filename);
+            $team->logo_url = 'uploads/teams/profile-image/' . $filename;
         }
 
         if ($request->hasFile('banner_image')) {
@@ -78,8 +83,8 @@ class TeamController extends Controller
             }
 
             $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
-            $path = $request->file('banner_image')->storeAs('uploads/teams/banner-image', $filename, 'public');
-            $team->banner_image = 'storage/' . $path;
+            $request->file('banner_image')->move(public_path('uploads/teams/banner-image'), $filename);
+            $team->banner_image = 'uploads/teams/banner-image/' . $filename;
         }
 
         $team->save();
@@ -89,12 +94,12 @@ class TeamController extends Controller
 
     public function destroy(Team $team): JsonResponse
     {
-        if ($team->logo_url) {
-            Storage::disk('public')->delete(str_replace('storage/', '', $team->logo_url));
+        if ($team->logo_url && file_exists(public_path($team->logo_url))) {
+            unlink(public_path($team->logo_url));
         }
 
-        if ($team->banner_image) {
-            Storage::disk('public')->delete(str_replace('storage/', '', $team->banner_image));
+        if ($team->banner_image && file_exists(public_path($team->banner_image))) {
+            unlink(public_path($team->banner_image));
         }
 
         $team->delete();
