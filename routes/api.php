@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Models\User;
 use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\FollowController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\{
     StadiumController,
     TeamController,
@@ -201,6 +202,16 @@ Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () 
     Route::post('/follow',    [FollowController::class, 'follow']);
     Route::delete('/unfollow', [FollowController::class, 'unfollow']);
     Route::get('/following',  [FollowController::class, 'index']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| USER RESOURCES
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
 });
 
 /*
