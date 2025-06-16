@@ -10,19 +10,20 @@ class Comment extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'post_id',
         'comment',
     ];
 
+    protected $casts = [
+        'user_id' => 'integer',
+        'post_id' => 'integer',
+        'comment' => 'string',
+    ];
+
     /**
-     * The user who made the comment.
+     * Get the user who made the comment.
      */
     public function user(): BelongsTo
     {
@@ -30,7 +31,7 @@ class Comment extends Model
     }
 
     /**
-     * The post this comment belongs to.
+     * Get the post this comment belongs to.
      */
     public function post(): BelongsTo
     {

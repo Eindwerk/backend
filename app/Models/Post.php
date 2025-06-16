@@ -17,45 +17,28 @@ class Post extends Model
         'image',
     ];
 
-    /**
-     * The user who made the post.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * The game this post refers to.
-     */
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
     }
 
-    /**
-     * Comments on this post.
-     */
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
-    /**
-     * Likes on this post.
-     */
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
     }
 
-    /**
-     * Computed title: HomeTeam vs AwayTeam @ Stadium
-     */
     public function getTitleAttribute(): string
     {
-        $this->loadMissing('game.homeTeam', 'game.awayTeam', 'game.stadium');
-
         $home = $this->game?->homeTeam?->name ?? 'Home Team';
         $away = $this->game?->awayTeam?->name ?? 'Away Team';
         $stadium = $this->game?->stadium?->name ?? 'Stadium';

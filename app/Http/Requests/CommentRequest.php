@@ -7,23 +7,21 @@ use Illuminate\Foundation\Http\FormRequest;
 class CommentRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autoriseer alle gebruikers. Pas aan indien nodig.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * Validatieregels voor het aanmaken van een comment.
      */
     public function rules(): array
     {
         return [
             'post_id' => ['required', 'exists:posts,id'],
-            'comment' => ['required', 'string'],
+            'comment' => ['required', 'string', 'max:1000'],
         ];
     }
 }

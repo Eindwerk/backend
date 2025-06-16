@@ -11,11 +11,6 @@ class Game extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'stadium_id',
         'home_team_id',
@@ -25,8 +20,17 @@ class Game extends Model
         'match_date',
     ];
 
+    protected $casts = [
+        'stadium_id'    => 'integer',
+        'home_team_id'  => 'integer',
+        'away_team_id'  => 'integer',
+        'home_score'    => 'integer',
+        'away_score'    => 'integer',
+        'match_date'    => 'datetime',
+    ];
+
     /**
-     * The stadium where the game is played.
+     * Stadion waarin deze match gespeeld werd.
      */
     public function stadium(): BelongsTo
     {
@@ -34,7 +38,7 @@ class Game extends Model
     }
 
     /**
-     * The team that played at home.
+     * Thuisploeg.
      */
     public function homeTeam(): BelongsTo
     {
@@ -42,7 +46,7 @@ class Game extends Model
     }
 
     /**
-     * The team that played away.
+     * Uitploeg.
      */
     public function awayTeam(): BelongsTo
     {
@@ -50,7 +54,7 @@ class Game extends Model
     }
 
     /**
-     * Visits linked to this game.
+     * Bezoeken gekoppeld aan deze wedstrijd.
      */
     public function visits(): HasMany
     {
@@ -58,7 +62,7 @@ class Game extends Model
     }
 
     /**
-     * Posts about this game.
+     * Posts over deze wedstrijd.
      */
     public function posts(): HasMany
     {

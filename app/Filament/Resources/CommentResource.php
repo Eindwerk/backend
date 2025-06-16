@@ -22,11 +22,28 @@ class CommentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('user.name')->label('Gebruiker')->searchable(),
-                Tables\Columns\TextColumn::make('post.id')->label('Post'),
-                Tables\Columns\TextColumn::make('comment')->label('Reactie')->limit(50),
-                Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Gebruiker')
+                    ->searchable()
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('post.id')
+                    ->label('Post ID')
+                    ->numeric(),
+
+                Tables\Columns\TextColumn::make('comment')
+                    ->label('Reactie')
+                    ->limit(80)
+                    ->wrap(),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Datum')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->actions([
                 Tables\Actions\DeleteAction::make(),
@@ -45,12 +62,12 @@ class CommentResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+        return self::isAdmin();
     }
 
     public static function canView($record): bool
     {
-        return self::canViewAny();
+        return self::isAdmin();
     }
 
     public static function canCreate(): bool
@@ -65,11 +82,16 @@ class CommentResource extends Resource
 
     public static function canDelete($record): bool
     {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+        return self::isAdmin();
     }
 
     public static function canDeleteAny(): bool
     {
-        return self::canDelete(null);
+        return self::isAdmin();
+    }
+
+    protected static function isAdmin(): bool
+    {
+        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
     }
 }

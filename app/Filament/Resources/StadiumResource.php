@@ -10,6 +10,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class StadiumResource extends Resource
 {
@@ -22,51 +24,50 @@ class StadiumResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Naam')
-                    ->required()
-                    ->maxLength(255),
+        return $form->schema([
+            Forms\Components\TextInput::make('name')
+                ->label('Naam')
+                ->required()
+                ->maxLength(255),
 
-                Forms\Components\Select::make('team_id')
-                    ->label('Team')
-                    ->relationship('team', 'name')
-                    ->searchable()
-                    ->required(),
+            Forms\Components\Select::make('team_id')
+                ->label('Team')
+                ->relationship('team', 'name')
+                ->searchable()
+                ->required(),
 
-                Forms\Components\FileUpload::make('profile_image')
-                    ->label('Logo')
-                    ->disk('public')
-                    ->directory('stadiums/profile-image')
-                    ->image()
-                    ->imagePreviewHeight(100)
-                    ->visibility('public')
-                    ->preserveFilenames()
-                    ->maxSize(1024)
-                    ->nullable(),
+            Forms\Components\FileUpload::make('profile_image')
+                ->label('Logo')
+                ->disk('public')
+                ->directory('stadiums/profile-image')
+                ->image()
+                ->visibility('public')
+                ->preserveFilenames()
+                ->imagePreviewHeight('100')
+                ->maxSize(1024)
+                ->nullable(),
 
-                Forms\Components\FileUpload::make('banner_image')
-                    ->label('Banner')
-                    ->disk('public')
-                    ->directory('stadiums/banner-image')
-                    ->image()
-                    ->imagePreviewHeight(100)
-                    ->visibility('public')
-                    ->preserveFilenames()
-                    ->maxSize(4096)
-                    ->nullable(),
+            Forms\Components\FileUpload::make('banner_image')
+                ->label('Banner')
+                ->disk('public')
+                ->directory('stadiums/banner-image')
+                ->image()
+                ->visibility('public')
+                ->preserveFilenames()
+                ->imagePreviewHeight('100')
+                ->maxSize(4096)
+                ->nullable(),
 
-                Forms\Components\TextInput::make('location.latitude')
-                    ->label('Latitude')
-                    ->numeric()
-                    ->required(),
+            Forms\Components\TextInput::make('latitude')
+                ->label('Latitude')
+                ->numeric()
+                ->required(),
 
-                Forms\Components\TextInput::make('location.altitude')
-                    ->label('Altitude')
-                    ->numeric()
-                    ->required(),
-            ]);
+            Forms\Components\TextInput::make('altitude')
+                ->label('Altitude')
+                ->numeric()
+                ->required(),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -76,9 +77,8 @@ class StadiumResource extends Resource
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Logo')
                     ->disk('public')
-                    ->visibility('public')
-                    ->height(50)
-                    ->circular(),
+                    ->circular()
+                    ->height(50),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
@@ -99,11 +99,6 @@ class StadiumResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [];
-    }
-
     public static function getPages(): array
     {
         return [
@@ -111,5 +106,45 @@ class StadiumResource extends Resource
             'create' => Pages\CreateStadium::route('/create'),
             'edit' => Pages\EditStadium::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return self::isAdmin();
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return self::isAdmin();
+    }
+
+    public static function canCreate(): bool
+    {
+        return self::isAdmin();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return self::isAdmin();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return self::isSuperAdmin();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return self::isSuperAdmin();
+    }
+
+    protected static function isAdmin(): bool
+    {
+        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+    }
+
+    protected static function isSuperAdmin(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'super_admin';
     }
 }

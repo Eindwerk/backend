@@ -10,18 +10,13 @@ class Like extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'post_id',
     ];
 
     /**
-     * The user who liked the post.
+     * De gebruiker die deze like heeft gegeven.
      */
     public function user(): BelongsTo
     {
@@ -29,7 +24,7 @@ class Like extends Model
     }
 
     /**
-     * The post that was liked.
+     * De post waarop geliked werd.
      */
     public function post(): BelongsTo
     {

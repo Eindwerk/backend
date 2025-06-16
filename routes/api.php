@@ -72,12 +72,10 @@ Route::post('/login', function (Request $request) {
         return response()->json(['message' => 'Invalid credentials.'], 401);
     }
 
-    $isVerified = (bool) $user->hasVerifiedEmail();
-
     return response()->json([
         'token'    => $user->createToken('api-token')->plainTextToken,
         'user'     => $user,
-        'verified' => $isVerified,
+        'verified' => (bool) $user->hasVerifiedEmail(),
     ]);
 });
 
@@ -98,15 +96,14 @@ Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->
 | E-MAILVERIFICATIE
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth:sanctum', 'throttle:6,1'])
-    ->post('/email/verification-notification', function (Request $request) {
-        if ($request->user()->hasVerifiedEmail()) {
-            return response()->json(['message' => 'E-mailadres is al bevestigd.']);
-        }
+Route::middleware(['auth:sanctum', 'throttle:6,1'])->post('/email/verification-notification', function (Request $request) {
+    if ($request->user()->hasVerifiedEmail()) {
+        return response()->json(['message' => 'E-mailadres is al bevestigd.']);
+    }
 
-        $request->user()->sendEmailVerificationNotification();
-        return response()->json(['message' => 'Verificatiemail opnieuw verzonden.']);
-    });
+    $request->user()->sendEmailVerificationNotification();
+    return response()->json(['message' => 'Verificatiemail opnieuw verzonden.']);
+});
 
 Route::post('/email/verify', function (Request $request) {
     $request->validate([
@@ -199,9 +196,9 @@ Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () {
-    Route::post('/follow',    [FollowController::class, 'follow']);
+    Route::post('/follow',     [FollowController::class, 'follow']);
     Route::delete('/unfollow', [FollowController::class, 'unfollow']);
-    Route::get('/following',  [FollowController::class, 'index']);
+    Route::get('/following',   [FollowController::class, 'index']);
 });
 
 /*
@@ -210,7 +207,7 @@ Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () 
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users',     [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
 });
 
@@ -221,7 +218,7 @@ Route::middleware('auth:sanctum')->group(function () {
 */
 Route::middleware(['auth:sanctum', 'verified', ApiKeyMiddleware::class])->group(function () {
     // Custom update routes
-    Route::post('/teams/{team}',    [TeamController::class, 'update']);
+    Route::post('/teams/{team}',     [TeamController::class, 'update']);
     Route::post('/stadiums/{stadium}', [StadiumController::class, 'update']);
 
     // Custom create routes
@@ -229,12 +226,15 @@ Route::middleware(['auth:sanctum', 'verified', ApiKeyMiddleware::class])->group(
     Route::post('/stadiums', [StadiumController::class, 'store']);
 
     // Resource routes zonder store/update
-    Route::apiResource('teams', TeamController::class)->except(['store', 'update']);
+    Route::apiResource('teams',    TeamController::class)->except(['store', 'update']);
     Route::apiResource('stadiums', StadiumController::class)->except(['store', 'update']);
 
     Route::apiResource('games',  GameController::class);
     Route::apiResource('visits', VisitController::class);
     Route::apiResource('posts',  PostController::class);
+
+    // Extra routes
+    Route::get('/me/posts', [PostController::class, 'myPosts']);
 
     Route::post('comments',             [CommentController::class, 'store']);
     Route::delete('comments/{comment}', [CommentController::class, 'destroy']);

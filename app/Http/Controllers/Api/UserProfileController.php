@@ -46,7 +46,7 @@ class UserProfileController extends Controller
         $data = $request->validated();
 
         // Gebruikersnaam bijwerken
-        if (isset($data['username'])) {
+        if (!empty($data['username'])) {
             $user->username = $data['username'];
         }
 
@@ -54,22 +54,20 @@ class UserProfileController extends Controller
         File::ensureDirectoryExists(public_path('uploads/users/profile-image'));
         File::ensureDirectoryExists(public_path('uploads/users/banner-image'));
 
-        // Profielafbeelding bijwerken
+        // Profielafbeelding uploaden
         if ($request->hasFile('profile_image')) {
-            if ($user->profile_image && file_exists(public_path($user->profile_image))) {
-                unlink(public_path($user->profile_image));
-            }
+            // Oude afbeelding verwijderen
+            File::delete(public_path($user->profile_image));
 
             $filename = Str::random(40) . '.' . $request->file('profile_image')->getClientOriginalExtension();
             $request->file('profile_image')->move(public_path('uploads/users/profile-image'), $filename);
             $user->profile_image = 'uploads/users/profile-image/' . $filename;
         }
 
-        // Bannerafbeelding bijwerken
+        // Bannerafbeelding uploaden
         if ($request->hasFile('banner_image')) {
-            if ($user->banner_image && file_exists(public_path($user->banner_image))) {
-                unlink(public_path($user->banner_image));
-            }
+            // Oude afbeelding verwijderen
+            File::delete(public_path($user->banner_image));
 
             $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
             $request->file('banner_image')->move(public_path('uploads/users/banner-image'), $filename);

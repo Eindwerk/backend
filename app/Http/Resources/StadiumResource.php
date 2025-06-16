@@ -12,8 +12,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Allianz Arena"),
  *     @OA\Property(property="team_name", type="string", example="Bayern München"),
- *     @OA\Property(property="profile_image", type="string", format="url", nullable=true, example="https://admin.groundpass.be/storage/stadiums/profile-image/logo.png"),
- *     @OA\Property(property="banner_image", type="string", format="url", nullable=true, example="https://admin.groundpass.be/storage/stadiums/banner-image/banner.png"),
+ *     @OA\Property(property="profile_image", type="string", format="url", nullable=true, example="https://admin.groundpass.be/uploads/stadiums/profile-image/logo.png"),
+ *     @OA\Property(property="banner_image", type="string", format="url", nullable=true, example="https://admin.groundpass.be/uploads/stadiums/banner-image/banner.png"),
  *     @OA\Property(
  *         property="location",
  *         type="object",
@@ -33,7 +33,7 @@ class StadiumResource extends JsonResource
             'id'            => $this->id,
             'name'          => $this->name,
             'team_name'     => $this->team?->name,
-            'logo_url'      => $this->profile_image,
+            'profile_image' => $this->profile_image,
             'banner_image'  => $this->banner_image,
             'location'      => [
                 'latitude' => $this->location['latitude'] ?? null,

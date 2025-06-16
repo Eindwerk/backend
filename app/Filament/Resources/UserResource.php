@@ -10,9 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Columns\ImageColumn;
-use Illuminate\Container\Attributes\Log;
+use Illuminate\Database\Eloquent\Model;
 
 class UserResource extends Resource
 {
@@ -25,41 +23,54 @@ class UserResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                FileUpload::make('profile_image')
-                    ->label('Profielfoto')
-                    ->disk('public')
-                    ->directory('uploads/users/profile-image')
-                    ->image()
-                    ->imageEditor()
-                    ->imagePreviewHeight(150)
-                    ->preserveFilenames()
-                    ->visibility('public')
-                    ->maxSize(2048),
+        return $form->schema([
+            Forms\Components\FileUpload::make('profile_image')
+                ->label('Profielfoto')
+                ->disk('public')
+                ->directory('users/profile-image')
+                ->image()
+                ->imagePreviewHeight(150)
+                ->preserveFilenames()
+                ->visibility('public')
+                ->maxSize(2048)
+                ->nullable(),
 
-                Forms\Components\TextInput::make('name')
-                    ->label('Naam')
-                    ->required()
-                    ->maxLength(255),
+            Forms\Components\FileUpload::make('banner_image')
+                ->label('Banner')
+                ->disk('public')
+                ->directory('users/banner-image')
+                ->image()
+                ->imagePreviewHeight(100)
+                ->preserveFilenames()
+                ->visibility('public')
+                ->maxSize(4096)
+                ->nullable(),
 
-                Forms\Components\TextInput::make('email')
-                    ->label('E-mailadres')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-            ]);
+            Forms\Components\TextInput::make('name')
+                ->label('Naam')
+                ->required()
+                ->maxLength(255),
+
+            Forms\Components\TextInput::make('email')
+                ->label('E-mailadres')
+                ->email()
+                ->required()
+                ->maxLength(255),
+        ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                ImageColumn::make('profile_image')
+                Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Profielfoto')
-                    ->url(fn($record) => asset($record->profile_image))
-                    ->circular(),
+                    ->disk('public')
+                    ->visibility('public')
+                    ->circular()
+                    ->height(40),
+
+                Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
                 Tables\Columns\TextColumn::make('email')->label('E-mailadres')->searchable(),
                 Tables\Columns\TextColumn::make('role')->label('Rol')->badge(),
@@ -81,12 +92,12 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+        return self::isAdmin();
     }
 
-    public static function canView($record): bool
+    public static function canView(Model $record): bool
     {
-        return static::canViewAny();
+        return self::isAdmin();
     }
 
     public static function canCreate(): bool
@@ -94,23 +105,33 @@ class UserResource extends Resource
         return false;
     }
 
-    public static function canEdit($record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete($record): bool
+    public static function canDelete(Model $record): bool
     {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+        return self::isSuperAdmin();
     }
 
     public static function canDeleteAny(): bool
     {
-        return static::canDelete(null);
+        return self::isSuperAdmin();
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::check() && Auth::user()?->role === 'super_admin';
+        return self::isSuperAdmin();
+    }
+
+    protected static function isAdmin(): bool
+    {
+        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+    }
+
+    protected static function isSuperAdmin(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'super_admin';
     }
 }

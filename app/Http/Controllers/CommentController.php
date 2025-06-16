@@ -41,13 +41,15 @@ class CommentController extends Controller
      */
     public function store(CommentRequest $request): JsonResponse
     {
+        $data = $request->validated();
+
         $comment = Comment::create([
             'user_id' => Auth::id(),
-            ...$request->validated(),
+            ...$data,
         ]);
 
-        // Melding naar post-eigenaar
-        $post = Post::find($request->post_id);
+        $post = Post::find($data['post_id']);
+
         if ($post && $post->user_id !== Auth::id()) {
             Notification::create([
                 'user_id' => $post->user_id,
@@ -87,10 +89,13 @@ class CommentController extends Controller
     public function destroy(Comment $comment): JsonResponse
     {
         if ($comment->user_id !== Auth::id()) {
-            abort(403, 'Not authorized.');
+            return response()->json([
+                'message' => 'Je bent niet gemachtigd om deze reactie te verwijderen.',
+            ], 403);
         }
 
         $comment->delete();
+
         return response()->json(null, 204);
     }
 }

@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class PostResource extends Resource
@@ -22,34 +23,33 @@ class PostResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('user_id')
-                    ->label('Gebruiker')
-                    ->relationship('user', 'name')
-                    ->searchable()
-                    ->required(),
+        return $form->schema([
+            Forms\Components\Select::make('user_id')
+                ->label('Gebruiker')
+                ->relationship('user', 'name')
+                ->searchable()
+                ->required(),
 
-                Forms\Components\Select::make('game_id')
-                    ->label('Wedstrijd')
-                    ->relationship('game', 'id')
-                    ->searchable()
-                    ->required(),
+            Forms\Components\Select::make('game_id')
+                ->label('Wedstrijd')
+                ->relationship('game', 'id')
+                ->searchable()
+                ->required(),
 
-                Forms\Components\Textarea::make('content')
-                    ->label('Inhoud')
-                    ->required()
-                    ->rows(5),
+            Forms\Components\Textarea::make('content')
+                ->label('Inhoud')
+                ->required()
+                ->rows(5),
 
-                Forms\Components\FileUpload::make('image')
-                    ->label('Afbeelding')
-                    ->image()
-                    ->directory('posts')
-                    ->disk('public')
-                    ->visibility('public')
-                    ->columnSpanFull()
-                    ->imagePreviewHeight('250'),
-            ]);
+            Forms\Components\FileUpload::make('image')
+                ->label('Afbeelding')
+                ->image()
+                ->directory('posts')
+                ->disk('public')
+                ->visibility('public')
+                ->columnSpanFull()
+                ->imagePreviewHeight('250'),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -81,12 +81,12 @@ class PostResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+        return self::isAdmin();
     }
 
-    public static function canView($record): bool
+    public static function canView(Model $record): bool
     {
-        return static::canViewAny();
+        return self::isAdmin();
     }
 
     public static function canCreate(): bool
@@ -94,18 +94,28 @@ class PostResource extends Resource
         return false;
     }
 
-    public static function canEdit($record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete($record): bool
+    public static function canDelete(Model $record): bool
     {
-        return Auth::check() && Auth::user()->role === 'super_admin';
+        return self::isSuperAdmin();
     }
 
     public static function canDeleteAny(): bool
     {
-        return static::canDelete(null);
+        return self::isSuperAdmin();
+    }
+
+    protected static function isAdmin(): bool
+    {
+        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+    }
+
+    protected static function isSuperAdmin(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'super_admin';
     }
 }

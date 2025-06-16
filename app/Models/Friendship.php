@@ -10,18 +10,18 @@ class Friendship extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'friend_id',
     ];
 
+    protected $casts = [
+        'user_id' => 'integer',
+        'friend_id' => 'integer',
+    ];
+
     /**
-     * The user who added the friend.
+     * De gebruiker die de vriendschap heeft aangevraagd.
      */
     public function user(): BelongsTo
     {
@@ -29,7 +29,7 @@ class Friendship extends Model
     }
 
     /**
-     * The friend who was added.
+     * De vriend die werd toegevoegd.
      */
     public function friend(): BelongsTo
     {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\VisitRequest;
 use App\Http\Resources\VisitResource;
 use App\Models\Visit;
+use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,7 +33,11 @@ class VisitController extends Controller
      */
     public function index(): JsonResponse
     {
-        $visits = Visit::with('game')->where('user_id', Auth::id())->get();
+        $visits = Visit::with('game')
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
         return response()->json(VisitResource::collection($visits));
     }
 
@@ -66,11 +71,12 @@ class VisitController extends Controller
             ...$request->validated(),
         ]);
 
+        // Notificaties voor vrienden
         $user = Auth::user();
         foreach ($user->friendships as $friendship) {
             $friend = $friendship->friend;
 
-            \App\Models\Notification::create([
+            Notification::create([
                 'user_id' => $friend->id,
                 'sender_id' => $user->id,
                 'type' => 'visit',
@@ -87,24 +93,15 @@ class VisitController extends Controller
      *     summary="Toon een specifiek stadionbezoek",
      *     tags={"Visits"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID van het bezoek",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Bezoekdetails",
-     *         @OA\JsonContent(ref="#/components/schemas/Visit")
-     *     ),
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID van het bezoek", @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Bezoekdetails", @OA\JsonContent(ref="#/components/schemas/Visit")),
      *     @OA\Response(response=403, description="Geen toegang tot dit bezoek")
      * )
      */
     public function show(Visit $visit): JsonResponse
     {
         $this->authorizeVisit($visit);
+
         return response()->json(new VisitResource($visit->load('game')));
     }
 
@@ -114,13 +111,7 @@ class VisitController extends Controller
      *     summary="Update een stadionbezoek",
      *     tags={"Visits"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID van het bezoek",
-     *         @OA\Schema(type="integer")
-     *     ),
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID van het bezoek", @OA\Schema(type="integer")),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -128,17 +119,14 @@ class VisitController extends Controller
      *             @OA\Property(property="notes", type="string", example="Bijgewerkte notitie")
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Bezoek geüpdatet",
-     *         @OA\JsonContent(ref="#/components/schemas/Visit")
-     *     ),
+     *     @OA\Response(response=200, description="Bezoek geüpdatet", @OA\JsonContent(ref="#/components/schemas/Visit")),
      *     @OA\Response(response=403, description="Niet gemachtigd")
      * )
      */
     public function update(VisitRequest $request, Visit $visit): JsonResponse
     {
         $this->authorizeVisit($visit);
+
         $visit->update($request->validated());
 
         return response()->json(new VisitResource($visit->load('game')));
@@ -150,23 +138,15 @@ class VisitController extends Controller
      *     summary="Verwijder een bezoek",
      *     tags={"Visits"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID van het bezoek",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Bezoek verwijderd"
-     *     ),
+     *     @OA\Parameter(name="id", in="path", required=true, description="ID van het bezoek", @OA\Schema(type="integer")),
+     *     @OA\Response(response=204, description="Bezoek verwijderd"),
      *     @OA\Response(response=403, description="Niet gemachtigd")
      * )
      */
     public function destroy(Visit $visit): JsonResponse
     {
         $this->authorizeVisit($visit);
+
         $visit->delete();
 
         return response()->json(null, 204);
@@ -175,7 +155,7 @@ class VisitController extends Controller
     protected function authorizeVisit(Visit $visit): void
     {
         if ($visit->user_id !== Auth::id()) {
-            abort(403, 'Not authorized.');
+            abort(403, 'Je bent niet gemachtigd om dit bezoek te bekijken of bewerken.');
         }
     }
 }

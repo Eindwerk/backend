@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class LeagueResource extends Resource
@@ -35,9 +36,19 @@ class LeagueResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->label('Naam')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Naam')
+                    ->searchable()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Aangemaakt op')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -59,31 +70,41 @@ class LeagueResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+        return self::isAdmin();
     }
 
-    public static function canView($record): bool
+    public static function canView(Model $record): bool
     {
-        return static::canViewAny();
+        return self::isAdmin();
     }
 
     public static function canCreate(): bool
     {
-        return Auth::check() && Auth::user()->role === 'super_admin';
+        return self::isSuperAdmin();
     }
 
-    public static function canEdit($record): bool
+    public static function canEdit(Model $record): bool
     {
-        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+        return self::isAdmin();
     }
 
-    public static function canDelete($record): bool
+    public static function canDelete(Model $record): bool
     {
-        return Auth::check() && Auth::user()->role === 'super_admin';
+        return self::isSuperAdmin();
     }
 
     public static function canDeleteAny(): bool
     {
-        return static::canDelete(null);
+        return self::isSuperAdmin();
+    }
+
+    protected static function isAdmin(): bool
+    {
+        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+    }
+
+    protected static function isSuperAdmin(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'super_admin';
     }
 }

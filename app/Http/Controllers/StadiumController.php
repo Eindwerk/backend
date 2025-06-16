@@ -19,7 +19,8 @@ class StadiumController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(StadiumResource::collection(Stadium::all()));
+        $stadiums = Stadium::all();
+        return response()->json(StadiumResource::collection($stadiums));
     }
 
     public function store(StadiumRequest $request): JsonResponse
@@ -55,25 +56,17 @@ class StadiumController extends Controller
     {
         $data = $request->validated();
 
-        if (isset($data['name'])) {
-            $stadium->name = $data['name'];
-        }
-
-        if (isset($data['team_id'])) {
-            $stadium->team_id = $data['team_id'];
-        }
-
-        if (isset($data['location'])) {
-            $stadium->location = $data['location'];
-        }
+        $stadium->fill([
+            'name' => $data['name'] ?? $stadium->name,
+            'team_id' => $data['team_id'] ?? $stadium->team_id,
+            'location' => $data['location'] ?? $stadium->location,
+        ]);
 
         File::ensureDirectoryExists(public_path('uploads/stadiums/profile-image'));
         File::ensureDirectoryExists(public_path('uploads/stadiums/banner-image'));
 
         if ($request->hasFile('profile_image')) {
-            if ($stadium->profile_image && file_exists(public_path($stadium->profile_image))) {
-                unlink(public_path($stadium->profile_image));
-            }
+            File::delete(public_path($stadium->profile_image));
 
             $filename = Str::random(40) . '.' . $request->file('profile_image')->getClientOriginalExtension();
             $request->file('profile_image')->move(public_path('uploads/stadiums/profile-image'), $filename);
@@ -81,9 +74,7 @@ class StadiumController extends Controller
         }
 
         if ($request->hasFile('banner_image')) {
-            if ($stadium->banner_image && file_exists(public_path($stadium->banner_image))) {
-                unlink(public_path($stadium->banner_image));
-            }
+            File::delete(public_path($stadium->banner_image));
 
             $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
             $request->file('banner_image')->move(public_path('uploads/stadiums/banner-image'), $filename);
@@ -97,13 +88,8 @@ class StadiumController extends Controller
 
     public function destroy(Stadium $stadium): JsonResponse
     {
-        if ($stadium->profile_image && file_exists(public_path($stadium->profile_image))) {
-            unlink(public_path($stadium->profile_image));
-        }
-
-        if ($stadium->banner_image && file_exists(public_path($stadium->banner_image))) {
-            unlink(public_path($stadium->banner_image));
-        }
+        File::delete(public_path($stadium->profile_image));
+        File::delete(public_path($stadium->banner_image));
 
         $stadium->delete();
 

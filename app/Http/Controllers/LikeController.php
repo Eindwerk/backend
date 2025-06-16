@@ -39,9 +39,11 @@ class LikeController extends Controller
      */
     public function store(LikeRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+
         $like = Like::firstOrCreate([
             'user_id' => Auth::id(),
-            'post_id' => $request->validated()['post_id'],
+            'post_id' => $validated['post_id'],
         ]);
 
         return response()->json(new LikeResource($like), 201);
@@ -63,20 +65,22 @@ class LikeController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Like verwijderd",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="deleted", type="boolean", example=true)
-     *         )
+     *         @OA\JsonContent(@OA\Property(property="deleted", type="boolean", example=true))
      *     ),
      *     @OA\Response(response=404, description="Like niet gevonden"),
      *     @OA\Response(response=401, description="Niet geauthenticeerd")
      * )
      */
-    public function destroy($post_id): JsonResponse
+    public function destroy(int $post_id): JsonResponse
     {
         $deleted = Like::where('user_id', Auth::id())
             ->where('post_id', $post_id)
             ->delete();
 
-        return response()->json(['deleted' => $deleted > 0], $deleted ? 200 : 404);
+        if ($deleted) {
+            return response()->json(['deleted' => true], 200);
+        }
+
+        return response()->json(['message' => 'Like niet gevonden.'], 404);
     }
 }

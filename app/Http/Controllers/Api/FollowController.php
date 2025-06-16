@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
 
 /**
  * @OA\Tag(
@@ -15,8 +16,6 @@ use Illuminate\Support\Str;
 class FollowController extends Controller
 {
     /**
-     * Volg een gebruiker, team of stadion
-     *
      * @OA\Post(
      *     path="/api/follow",
      *     summary="Volg een team, stadion of user",
@@ -39,41 +38,35 @@ class FollowController extends Controller
      *     @OA\Response(response=422, description="Validatiefout")
      * )
      */
-    public function follow(Request $request)
+    public function follow(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'followable_type' => 'required|string|in:team,stadium,user',
             'followable_id' => 'required|integer',
         ]);
 
         $user = $request->user();
+        $modelClass = $this->getFollowableClass($validated['followable_type']);
+        $followable = $modelClass::findOrFail($validated['followable_id']);
 
-        $modelClass = match (Str::lower($request->followable_type)) {
-            'team' => \App\Models\Team::class,
-            'stadium' => \App\Models\Stadium::class,
-            'user' => \App\Models\User::class,
-        };
+        $alreadyFollowing = $user->follows()
+            ->where('followable_type', $modelClass)
+            ->where('followable_id', $followable->id)
+            ->exists();
 
-        $followable = $modelClass::findOrFail($request->followable_id);
-
-        if ($user->follows()->where([
-            ['followable_id', $followable->id],
-            ['followable_type', $modelClass]
-        ])->exists()) {
+        if ($alreadyFollowing) {
             return response()->json(['message' => 'Je volgt dit al.'], 409);
         }
 
         $user->follows()->create([
-            'followable_id' => $followable->id,
             'followable_type' => $modelClass,
+            'followable_id' => $followable->id,
         ]);
 
         return response()->json(['message' => 'Succesvol gevolgd.']);
     }
 
     /**
-     * Ontvolg een gebruiker, team of stadion
-     *
      * @OA\Delete(
      *     path="/api/unfollow",
      *     summary="Ontvolg een team, stadion of user",
@@ -95,32 +88,25 @@ class FollowController extends Controller
      *     @OA\Response(response=422, description="Validatiefout")
      * )
      */
-    public function unfollow(Request $request)
+    public function unfollow(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'followable_type' => 'required|string|in:team,stadium,user',
             'followable_id' => 'required|integer',
         ]);
 
         $user = $request->user();
-
-        $modelClass = match (Str::lower($request->followable_type)) {
-            'team' => \App\Models\Team::class,
-            'stadium' => \App\Models\Stadium::class,
-            'user' => \App\Models\User::class,
-        };
+        $modelClass = $this->getFollowableClass($validated['followable_type']);
 
         $user->follows()->where([
-            ['followable_id', $request->followable_id],
             ['followable_type', $modelClass],
+            ['followable_id', $validated['followable_id']],
         ])->delete();
 
         return response()->json(['message' => 'Ontvolgd.']);
     }
 
     /**
-     * Lijst van alles wat de gebruiker volgt
-     *
      * @OA\Get(
      *     path="/api/follows",
      *     summary="Overzicht van alles wat de gebruiker volgt",
@@ -135,12 +121,22 @@ class FollowController extends Controller
      *     )
      * )
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        return response()->json([
-            'follows' => $user->follows()->with('followable')->get(),
-        ]);
+        $follows = $user->follows()->with('followable')->get();
+
+        return response()->json(['follows' => $follows]);
+    }
+
+    private function getFollowableClass(string $type): string
+    {
+        return match (Str::of($type)->lower()->toString()) {
+            'team' => \App\Models\Team::class,
+            'stadium' => \App\Models\Stadium::class,
+            'user' => \App\Models\User::class,
+            default => abort(422, 'Invalid followable_type'),
+        };
     }
 }

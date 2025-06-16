@@ -20,7 +20,8 @@ class TeamController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(TeamResource::collection(Team::all()));
+        $teams = Team::all();
+        return response()->json(TeamResource::collection($teams));
     }
 
     public function store(StoreTeamRequest $request): JsonResponse
@@ -56,21 +57,16 @@ class TeamController extends Controller
     {
         $data = $request->validated();
 
-        if (isset($data['name'])) {
-            $team->name = $data['name'];
-        }
-
-        if (isset($data['league'])) {
-            $team->league = $data['league'];
-        }
+        $team->fill([
+            'name' => $data['name'] ?? $team->name,
+            'league' => $data['league'] ?? $team->league,
+        ]);
 
         File::ensureDirectoryExists(public_path('uploads/teams/profile-image'));
         File::ensureDirectoryExists(public_path('uploads/teams/banner-image'));
 
         if ($request->hasFile('logo_url')) {
-            if ($team->logo_url && file_exists(public_path($team->logo_url))) {
-                unlink(public_path($team->logo_url));
-            }
+            File::delete(public_path($team->logo_url));
 
             $filename = Str::random(40) . '.' . $request->file('logo_url')->getClientOriginalExtension();
             $request->file('logo_url')->move(public_path('uploads/teams/profile-image'), $filename);
@@ -78,9 +74,7 @@ class TeamController extends Controller
         }
 
         if ($request->hasFile('banner_image')) {
-            if ($team->banner_image && file_exists(public_path($team->banner_image))) {
-                unlink(public_path($team->banner_image));
-            }
+            File::delete(public_path($team->banner_image));
 
             $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
             $request->file('banner_image')->move(public_path('uploads/teams/banner-image'), $filename);
@@ -94,13 +88,8 @@ class TeamController extends Controller
 
     public function destroy(Team $team): JsonResponse
     {
-        if ($team->logo_url && file_exists(public_path($team->logo_url))) {
-            unlink(public_path($team->logo_url));
-        }
-
-        if ($team->banner_image && file_exists(public_path($team->banner_image))) {
-            unlink(public_path($team->banner_image));
-        }
+        File::delete(public_path($team->logo_url));
+        File::delete(public_path($team->banner_image));
 
         $team->delete();
 

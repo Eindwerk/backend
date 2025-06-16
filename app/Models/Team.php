@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Team extends Model
 {
@@ -28,9 +29,9 @@ class Team extends Model
         return $this->hasMany(Game::class, 'away_team_id');
     }
 
-    public function followers()
+    public function followers(): MorphToMany
     {
-        return $this->morphToMany(User::class, 'followable', 'follows');
+        return $this->morphToMany(User::class, 'followable', 'follows')->withTimestamps();
     }
 
     public function league(): BelongsTo

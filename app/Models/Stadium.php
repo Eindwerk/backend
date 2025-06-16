@@ -42,11 +42,10 @@ class Stadium extends Model
     /**
      * Followers (polymorphic)
      */
-    public function followers()
+    public function followers(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {
-        return $this->morphToMany(User::class, 'followable', 'follows');
+        return $this->morphToMany(User::class, 'followable', 'follows')->withTimestamps();
     }
-
     /**
      * Het team dat hier speelt.
      */
@@ -76,9 +75,11 @@ class Stadium extends Model
      */
     public function getLocationObjectAttribute(): array
     {
+        $location = $this->location ?? [];
+
         return [
-            'latitude' => $this->location['latitude'] ?? null,
-            'altitude' => $this->location['altitude'] ?? null,
+            'latitude' => $location['latitude'] ?? null,
+            'altitude' => $location['altitude'] ?? null,
         ];
     }
 }

@@ -10,8 +10,8 @@ use Illuminate\Routing\Controller as BaseController;
 /**
  * @OA\Info(
  *     title="Stadion Tracker API",
- *     description="API-documentatie voor stadionbezoeken, wedstrijden, posts en gebruikersinteractie.",
  *     version="1.0.0",
+ *     description="API-documentatie voor stadionbezoeken, wedstrijden, posts en gebruikersinteractie.",
  *     @OA\Contact(
  *         email="cedricvanhoorebeke@outlook.com"
  *     ),

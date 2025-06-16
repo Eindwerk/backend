@@ -23,6 +23,24 @@ class Visit extends Model
     ];
 
     /**
+     * Automatically cast visited_at to a Carbon date instance.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'visited_at' => 'date',
+    ];
+
+    /**
+     * Add custom attributes to the model's array and JSON form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'visited_at_formatted',
+    ];
+
+    /**
      * The user who visited the game.
      */
     public function user(): BelongsTo
@@ -36,5 +54,13 @@ class Visit extends Model
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
+    }
+
+    /**
+     * A formatted version of the visited_at date.
+     */
+    public function getVisitedAtFormattedAttribute(): ?string
+    {
+        return $this->visited_at?->format('Y-m-d');
     }
 }

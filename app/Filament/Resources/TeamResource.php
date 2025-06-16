@@ -10,7 +10,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\FileUpload;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class TeamResource extends Resource
 {
@@ -23,30 +24,40 @@ class TeamResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Naam')
-                    ->required()
-                    ->maxLength(255),
+        return $form->schema([
+            Forms\Components\TextInput::make('name')
+                ->label('Naam')
+                ->required()
+                ->maxLength(255),
 
-                Forms\Components\Select::make('league_id')
-                    ->label('Competitie')
-                    ->relationship('league', 'name')
-                    ->required()
-                    ->searchable(),
+            Forms\Components\Select::make('league_id')
+                ->label('Competitie')
+                ->relationship('league', 'name')
+                ->required()
+                ->searchable(),
 
-                Forms\Components\FileUpload::make('logo_url')
-                    ->label('Logo')
-                    ->disk('public')
-                    ->directory('teams')
-                    ->image()
-                    ->imagePreviewHeight(100)
-                    ->visibility('public')
-                    ->preserveFilenames()
-                    ->maxSize(1024)
-                    ->nullable(),
-            ]);
+            Forms\Components\FileUpload::make('logo_url')
+                ->label('Logo')
+                ->disk('public')
+                ->directory('teams/profile-image')
+                ->image()
+                ->imagePreviewHeight(100)
+                ->visibility('public')
+                ->preserveFilenames()
+                ->maxSize(1024)
+                ->nullable(),
+
+            Forms\Components\FileUpload::make('banner_image')
+                ->label('Banner')
+                ->disk('public')
+                ->directory('teams/banner-image')
+                ->image()
+                ->imagePreviewHeight(100)
+                ->visibility('public')
+                ->preserveFilenames()
+                ->maxSize(4096)
+                ->nullable(),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -79,11 +90,6 @@ class TeamResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [];
-    }
-
     public static function getPages(): array
     {
         return [
@@ -91,5 +97,45 @@ class TeamResource extends Resource
             'create' => Pages\CreateTeam::route('/create'),
             'edit' => Pages\EditTeam::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return self::isAdmin();
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return self::isAdmin();
+    }
+
+    public static function canCreate(): bool
+    {
+        return self::isAdmin();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return self::isAdmin();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return self::isSuperAdmin();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return self::isSuperAdmin();
+    }
+
+    protected static function isAdmin(): bool
+    {
+        return Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']);
+    }
+
+    protected static function isSuperAdmin(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'super_admin';
     }
 }

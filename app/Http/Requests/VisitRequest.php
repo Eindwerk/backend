@@ -3,28 +3,29 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class VisitRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Bepaal of de gebruiker gemachtigd is om dit verzoek uit te voeren.
      */
     public function authorize(): bool
     {
-        return false;
+        return Auth::check(); // of gewoon: return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Valideer de regels voor het verzoek.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'game_id' => ['required', 'exists:games,id'],
+            'game_id'    => ['required', 'exists:games,id'],
             'visited_at' => ['nullable', 'date'],
-            'notes' => ['nullable', 'string'],
+            'notes'      => ['nullable', 'string'],
         ];
     }
 }

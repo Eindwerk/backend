@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\GameResource;
 
 /**
  * @OA\Schema(
@@ -30,7 +30,7 @@ class VisitResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'game' => new \App\Http\Resources\GameResource($this->whenLoaded('game')),
+            'game' => new GameResource($this->whenLoaded('game')),
             'visited_at' => $this->visited_at,
             'notes' => $this->notes,
             'created_at' => $this->created_at,

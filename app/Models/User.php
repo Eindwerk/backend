@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -14,11 +15,6 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, Notifiable;
 
-    /**
-     * Welke velden mag je mass-assignen?
-     * We voegen ’email_verification_token’ en ’email_verification_token_expires_at’ 
-     * NIET toe aan fillable—deze worden server-side ingesteld.
-     */
     protected $fillable = [
         'name',
         'email',
@@ -30,29 +26,18 @@ class User extends Authenticatable implements MustVerifyEmail
         'banner_image',
     ];
 
-    /**
-     * Velden die je niet in JSON wilt teruggeven.
-     * We verbergen de (gehasht) verificatie-token.
-     */
     protected $hidden = [
         'password',
         'remember_token',
         'email_verification_token',
     ];
 
-    /**
-     * Casts voor datetime-velden en automatisch hashen van password.
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'email_verification_token_expires_at' => 'datetime',
         'password' => 'hashed',
     ];
 
-    /**
-     * Booted-hook: bij het aanmaken (creating) willen we
-     * automatisch het ’role’-veld instellen en een willekeurige ID genereren.
-     */
     protected static function booted()
     {
         static::creating(function ($user) {
@@ -60,12 +45,13 @@ class User extends Authenticatable implements MustVerifyEmail
                 $user->role = 'user';
             }
 
-            // Jouw eigen ID-logica (zoals eerder):
+            // Genereer random ID
             $user->id = random_int(1000000000, 9999999999);
         });
     }
 
-    /** RELATIES */
+    // RELATIES
+
     public function visits(): HasMany
     {
         return $this->hasMany(Visit::class);
@@ -106,17 +92,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(\App\Models\Follow::class);
     }
 
-    public function followedTeams()
+    public function followedTeams(): MorphToMany
     {
         return $this->morphedByMany(Team::class, 'followable', 'follows');
     }
 
-    public function followedStadiums()
+    public function followedStadiums(): MorphToMany
     {
         return $this->morphedByMany(Stadium::class, 'followable', 'follows');
     }
 
-    public function followedUsers()
+    public function followedUsers(): MorphToMany
     {
         return $this->morphedByMany(User::class, 'followable', 'follows');
     }
@@ -127,28 +113,19 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * OVERSCHRIJF sendEmailVerificationNotification:
-     * - genereer een “platte” token (32 tekens)
-     * - hasht die token in de database
-     * - stel expiratie in (bv. nu + 60 minuten)
-     * - sla op en stuur daarna onze eigen notification
+     * Stuur aangepaste e-mailverificatie met platte token
      */
     public function sendEmailVerificationNotification()
     {
-        // 1) Genereer een random “plain-token” (32 karakters)
         $plainToken = Str::random(32);
 
-        // 2) Hash de token en sla op in de DB
         $this->email_verification_token = hash_hmac('sha256', $plainToken, config('app.key'));
-
-        // 3) Expiratietijd
         $this->email_verification_token_expires_at = now()->addMinutes(
             config('auth.verification.expire', 60)
         );
 
         $this->save();
 
-        // 4) Stuur de FrontendVerifyEmail-notification met de ‘platte’ token
         $this->notify(new FrontendVerifyEmail($plainToken));
     }
 }

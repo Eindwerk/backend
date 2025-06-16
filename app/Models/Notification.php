@@ -10,11 +10,6 @@ class Notification extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'sender_id',
@@ -24,7 +19,7 @@ class Notification extends Model
     ];
 
     /**
-     * The user who receives the notification.
+     * Ontvanger van de notificatie.
      */
     public function user(): BelongsTo
     {
@@ -32,7 +27,7 @@ class Notification extends Model
     }
 
     /**
-     * The user who triggered the notification.
+     * Verzender van de notificatie (bijv. degene die reageerde of een bezoek toevoegde).
      */
     public function sender(): BelongsTo
     {
@@ -40,7 +35,7 @@ class Notification extends Model
     }
 
     /**
-     * The related game.
+     * Gerelateerde game (indien van toepassing).
      */
     public function game(): BelongsTo
     {
@@ -48,7 +43,7 @@ class Notification extends Model
     }
 
     /**
-     * The related post (if applicable).
+     * Gerelateerde post (indien van toepassing).
      */
     public function post(): BelongsTo
     {
