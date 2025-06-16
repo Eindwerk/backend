@@ -84,15 +84,23 @@ class PostController extends Controller
      */
     public function store(PostRequest $request): JsonResponse
     {
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('posts', 'public');
+        }
+
         $post = Post::create([
             'user_id' => Auth::id(),
-            ...$request->validated(),
+            'game_id' => $data['game_id'],
+            'stadium_id' => $data['stadium_id'],
+            'image_path' => $data['image_path'] ?? null,
+            'content' => $data['content'] ?? null,
         ]);
 
-        return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'comments', 'user'])),
-            201
-        );
+        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'comments', 'user']);
+
+        return response()->json(new PostResource($post), 201);
     }
 
     /**
