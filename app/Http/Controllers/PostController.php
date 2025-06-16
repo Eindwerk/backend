@@ -87,7 +87,8 @@ class PostController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('posts', 'public');
+            $path = $request->file('image')->store('posts', 'public');
+            $data['image_path'] = $path;
         }
 
         $post = Post::create([
