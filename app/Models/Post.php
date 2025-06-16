@@ -14,7 +14,8 @@ class Post extends Model
     protected $fillable = [
         'user_id',
         'game_id',
-        'image',
+        'stadium_id',
+        'image_path',
     ];
 
     public function user(): BelongsTo
@@ -37,11 +38,28 @@ class Post extends Model
         return $this->hasMany(Like::class);
     }
 
+    // Helper accessors om teamnamen makkelijk te krijgen
+
+    public function getHomeTeamAttribute()
+    {
+        return $this->game?->homeTeam;
+    }
+
+    public function getAwayTeamAttribute()
+    {
+        return $this->game?->awayTeam;
+    }
+
+    public function getStadiumAttribute()
+    {
+        return $this->game?->stadium;
+    }
+
     public function getTitleAttribute(): string
     {
-        $home = $this->game?->homeTeam?->name ?? 'Home Team';
-        $away = $this->game?->awayTeam?->name ?? 'Away Team';
-        $stadium = $this->game?->stadium?->name ?? 'Stadium';
+        $home = $this->homeTeam?->name ?? 'Home Team';
+        $away = $this->awayTeam?->name ?? 'Away Team';
+        $stadium = $this->stadium?->name ?? 'Stadium';
 
         return "$home vs $away @ $stadium";
     }

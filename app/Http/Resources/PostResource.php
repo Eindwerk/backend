@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -33,6 +32,7 @@ class PostResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function toArray($request): array
@@ -43,7 +43,9 @@ class PostResource extends JsonResource
             'game' => new GameResource($this->whenLoaded('game')),
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'likes' => LikeResource::collection($this->whenLoaded('likes')),
-            'image' => $this->image,
+
+            // Zorg dat je image_path wordt gebruikt, niet image
+            'image' => $this->image_path ? url("uploads/posts/{$this->image_path}") : null,
 
             'title' => optional($this->game?->homeTeam)->name && optional($this->game?->awayTeam)->name && optional($this->game?->stadium)->name
                 ? "{$this->game->homeTeam->name} vs {$this->game->awayTeam->name} – {$this->game->stadium->name}"

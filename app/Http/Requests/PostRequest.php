@@ -17,7 +17,6 @@ class PostRequest extends FormRequest
             'game_id' => 'required|integer|exists:games,id',
             'stadium_id' => 'required|integer|exists:stadia,id',
             'image' => 'nullable|image|max:8192',
-            'content' => 'nullable|string',
         ];
     }
 }

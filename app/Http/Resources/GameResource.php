@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -26,6 +25,7 @@ class GameResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function toArray($request): array
@@ -41,7 +41,7 @@ class GameResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
-            // Optional: enkel als je ze meelaadt
+            // Alleen meenemen als eager loaded
             'stadium' => new StadiumResource($this->whenLoaded('stadium')),
             'home_team' => new TeamResource($this->whenLoaded('homeTeam')),
             'away_team' => new TeamResource($this->whenLoaded('awayTeam')),

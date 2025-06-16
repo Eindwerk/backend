@@ -30,30 +30,6 @@ class Game extends Model
     ];
 
     /**
-     * Stadion waarin deze match gespeeld werd.
-     */
-    public function stadium(): BelongsTo
-    {
-        return $this->belongsTo(Stadium::class);
-    }
-
-    /**
-     * Thuisploeg.
-     */
-    public function homeTeam(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'home_team_id');
-    }
-
-    /**
-     * Uitploeg.
-     */
-    public function awayTeam(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'away_team_id');
-    }
-
-    /**
      * Bezoeken gekoppeld aan deze wedstrijd.
      */
     public function visits(): HasMany
@@ -67,5 +43,20 @@ class Game extends Model
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function homeTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'home_team_id');
+    }
+
+    public function awayTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'away_team_id');
+    }
+
+    public function stadium(): BelongsTo
+    {
+        return $this->belongsTo(Stadium::class, 'stadium_id');
     }
 }
