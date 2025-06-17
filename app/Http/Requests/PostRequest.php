@@ -11,12 +11,12 @@ class PostRequest extends FormRequest
         return true;
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
-            'game_id' => 'required|integer|exists:games,id',
-            'stadium_id' => 'required|integer|exists:stadia,id',
-            'image' => 'nullable|image|max:8192',
+            'game_id' => ['required', 'integer', 'exists:games,id'],
+            'stadium_id' => ['required', 'integer', 'exists:stadia,id'],
+            'image' => ['nullable', 'image', 'max:8192'],
         ];
     }
 }

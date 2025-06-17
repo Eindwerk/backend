@@ -15,7 +15,7 @@ class StadiumRequest extends FormRequest
     {
         return [
             'name'             => ['required', 'string', 'max:255'],
-            'team_id'          => ['required', 'exists:teams,id'],
+            'team_id'          => ['required', 'integer', 'exists:teams,id'],
             'profile_image'    => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'banner_image'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
             'location'         => ['required', 'array'],

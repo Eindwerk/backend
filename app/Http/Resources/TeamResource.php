@@ -28,13 +28,13 @@ class TeamResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'            => $this->id,
-            'name'          => $this->name,
-            'league'        => $this->league,
-            'logo_url'      => $this->logo_url,
-            'banner_image'  => $this->banner_image,
-            'created_at'    => $this->created_at,
-            'updated_at'    => $this->updated_at,
+            'id'           => $this->id,
+            'name'         => $this->name,
+            'league'       => $this->league,
+            'logo_url'     => $this->logo_url ? url($this->logo_url) : null,
+            'banner_image' => $this->banner_image ? url($this->banner_image) : null,
+            'created_at'   => $this->created_at,
+            'updated_at'   => $this->updated_at,
         ];
     }
 }

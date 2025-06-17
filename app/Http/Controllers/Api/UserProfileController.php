@@ -56,8 +56,9 @@ class UserProfileController extends Controller
 
         // Profielafbeelding uploaden
         if ($request->hasFile('profile_image')) {
-            // Oude afbeelding verwijderen
-            File::delete(public_path($user->profile_image));
+            if ($user->profile_image && File::exists(public_path($user->profile_image))) {
+                File::delete(public_path($user->profile_image));
+            }
 
             $filename = Str::random(40) . '.' . $request->file('profile_image')->getClientOriginalExtension();
             $request->file('profile_image')->move(public_path('uploads/users/profile-image'), $filename);
@@ -66,8 +67,9 @@ class UserProfileController extends Controller
 
         // Bannerafbeelding uploaden
         if ($request->hasFile('banner_image')) {
-            // Oude afbeelding verwijderen
-            File::delete(public_path($user->banner_image));
+            if ($user->banner_image && File::exists(public_path($user->banner_image))) {
+                File::delete(public_path($user->banner_image));
+            }
 
             $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
             $request->file('banner_image')->move(public_path('uploads/users/banner-image'), $filename);

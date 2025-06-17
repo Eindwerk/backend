@@ -7,6 +7,8 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 /**
  * @OA\Tag(
@@ -54,9 +56,12 @@ class PostController extends Controller
     {
         $data = $request->validated();
 
+        File::ensureDirectoryExists(public_path('uploads/posts'));
+
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('posts', 'public');
-            $data['image_path'] = $path;
+            $filename = Str::random(40) . '.' . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move(public_path('uploads/posts'), $filename);
+            $data['image_path'] = 'uploads/posts/' . $filename;
         }
 
         $post = Post::create([
@@ -84,9 +89,16 @@ class PostController extends Controller
 
         $data = $request->validated();
 
+        File::ensureDirectoryExists(public_path('uploads/posts'));
+
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('posts', 'public');
-            $data['image_path'] = $path;
+            if ($post->image_path && File::exists(public_path($post->image_path))) {
+                File::delete(public_path($post->image_path));
+            }
+
+            $filename = Str::random(40) . '.' . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move(public_path('uploads/posts'), $filename);
+            $data['image_path'] = 'uploads/posts/' . $filename;
         }
 
         // Zorg dat content niet geüpdatet wordt (weggehaald)
@@ -102,7 +114,13 @@ class PostController extends Controller
     public function destroy(Post $post): JsonResponse
     {
         $this->authorizePost($post);
+
+        if ($post->image_path && File::exists(public_path($post->image_path))) {
+            File::delete(public_path($post->image_path));
+        }
+
         $post->delete();
+
         return response()->json(null, 204);
     }
 

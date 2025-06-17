@@ -33,8 +33,8 @@ class StadiumResource extends JsonResource
             'id'            => $this->id,
             'name'          => $this->name,
             'team_name'     => $this->team?->name,
-            'profile_image' => $this->profile_image,
-            'banner_image'  => $this->banner_image,
+            'profile_image' => $this->profile_image ? url($this->profile_image) : null,
+            'banner_image'  => $this->banner_image ? url($this->banner_image) : null,
             'location'      => [
                 'latitude' => $this->location['latitude'] ?? null,
                 'altitude' => $this->location['altitude'] ?? null,

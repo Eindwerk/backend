@@ -66,7 +66,9 @@ class StadiumController extends Controller
         File::ensureDirectoryExists(public_path('uploads/stadiums/banner-image'));
 
         if ($request->hasFile('profile_image')) {
-            File::delete(public_path($stadium->profile_image));
+            if ($stadium->profile_image && File::exists(public_path($stadium->profile_image))) {
+                File::delete(public_path($stadium->profile_image));
+            }
 
             $filename = Str::random(40) . '.' . $request->file('profile_image')->getClientOriginalExtension();
             $request->file('profile_image')->move(public_path('uploads/stadiums/profile-image'), $filename);
@@ -74,7 +76,9 @@ class StadiumController extends Controller
         }
 
         if ($request->hasFile('banner_image')) {
-            File::delete(public_path($stadium->banner_image));
+            if ($stadium->banner_image && File::exists(public_path($stadium->banner_image))) {
+                File::delete(public_path($stadium->banner_image));
+            }
 
             $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
             $request->file('banner_image')->move(public_path('uploads/stadiums/banner-image'), $filename);
@@ -88,8 +92,13 @@ class StadiumController extends Controller
 
     public function destroy(Stadium $stadium): JsonResponse
     {
-        File::delete(public_path($stadium->profile_image));
-        File::delete(public_path($stadium->banner_image));
+        if ($stadium->profile_image && File::exists(public_path($stadium->profile_image))) {
+            File::delete(public_path($stadium->profile_image));
+        }
+
+        if ($stadium->banner_image && File::exists(public_path($stadium->banner_image))) {
+            File::delete(public_path($stadium->banner_image));
+        }
 
         $stadium->delete();
 

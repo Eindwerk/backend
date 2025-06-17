@@ -15,6 +15,11 @@ use Illuminate\Http\JsonResponse;
  */
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+    }
+
     /**
      * @OA\Get(
      *     path="/api/users",
@@ -33,7 +38,7 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
-        $users = User::with('posts')->get(); // eager load posts if needed
+        $users = User::with('posts')->get();
         return response()->json(UserResource::collection($users));
     }
 
@@ -60,7 +65,7 @@ class UserController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $user = User::with(['posts'])->find($id); // optional: also load follows or followers
+        $user = User::with(['posts'])->find($id);
 
         if (!$user) {
             return response()->json([
