@@ -82,4 +82,28 @@ class Stadium extends Model
             'altitude' => $location['altitude'] ?? null,
         ];
     }
+
+    public function getLatitudeAttribute(): ?float
+    {
+        return $this->location['latitude'] ?? null;
+    }
+
+    public function setLatitudeAttribute($value): void
+    {
+        $location = $this->location ?? [];
+        $location['latitude'] = $value;
+        $this->attributes['location'] = json_encode($location);
+    }
+
+    public function getAltitudeAttribute(): ?float
+    {
+        return $this->location['altitude'] ?? null;
+    }
+
+    public function setAltitudeAttribute($value): void
+    {
+        $location = $this->location ?? [];
+        $location['altitude'] = $value;
+        $this->attributes['location'] = json_encode($location);
+    }
 }
