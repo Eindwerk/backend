@@ -70,14 +70,7 @@ class TeamResource extends Resource
                     ->disk('public')
                     ->visibility('public')
                     ->height(50)
-                    ->circular()
-                    ->getStateUsing(function ($record) {
-                        $path = $record->logo_url;
-                        if ($path) {
-                            return 'https://admin.groundpass.be/' . ltrim($path, '/');
-                        }
-                        return null;
-                    }),
+                    ->circular(),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
