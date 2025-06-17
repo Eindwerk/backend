@@ -10,6 +10,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Model;
 
 class UserResource extends Resource
@@ -26,25 +28,33 @@ class UserResource extends Resource
         return $form->schema([
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Profielfoto')
-                ->disk('public')
-                ->directory('users/profile-image')
+                ->disk('uploads')
+                ->directory('uploads/users/profile-image')
                 ->image()
                 ->imagePreviewHeight(150)
-                ->preserveFilenames()
                 ->visibility('public')
                 ->maxSize(2048)
-                ->nullable(),
+                ->nullable()
+                ->preserveFilenames(false)
+                ->getUploadedFileNameForStorageUsing(
+                    fn(UploadedFile $file): string =>
+                    Str::random(40) . '.' . $file->getClientOriginalExtension()
+                ),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
-                ->disk('public')
-                ->directory('users/banner-image')
+                ->disk('uploads')
+                ->directory('uploads/users/banner-image')
                 ->image()
                 ->imagePreviewHeight(100)
-                ->preserveFilenames()
                 ->visibility('public')
                 ->maxSize(4096)
-                ->nullable(),
+                ->nullable()
+                ->preserveFilenames(false)
+                ->getUploadedFileNameForStorageUsing(
+                    fn(UploadedFile $file): string =>
+                    Str::random(40) . '.' . $file->getClientOriginalExtension()
+                ),
 
             Forms\Components\TextInput::make('name')
                 ->label('Naam')
@@ -65,10 +75,14 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Profielfoto')
-                    ->disk('public')
+                    ->disk('uploads')
                     ->visibility('public')
                     ->circular()
-                    ->height(40),
+                    ->height(40)
+                    ->getStateUsing(
+                        fn($record) =>
+                        $record->profile_image ? env('APP_URL') . '/' . ltrim($record->profile_image, '/') : null
+                    ),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),

@@ -12,6 +12,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 
 class StadiumResource extends Resource
 {
@@ -38,25 +40,33 @@ class StadiumResource extends Resource
 
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Logo')
-                ->disk('public')
-                ->directory('stadiums/profile-image')
+                ->disk('uploads')
+                ->directory('uploads/stadiums/profile-image')
                 ->image()
+                ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->preserveFilenames()
-                ->imagePreviewHeight('100')
                 ->maxSize(1024)
-                ->nullable(),
+                ->nullable()
+                ->preserveFilenames(false)
+                ->getUploadedFileNameForStorageUsing(
+                    fn(UploadedFile $file): string =>
+                    Str::random(40) . '.' . $file->getClientOriginalExtension()
+                ),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
-                ->disk('public')
-                ->directory('stadiums/banner-image')
+                ->disk('uploads')
+                ->directory('uploads/stadiums/banner-image')
                 ->image()
+                ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->preserveFilenames()
-                ->imagePreviewHeight('100')
                 ->maxSize(4096)
-                ->nullable(),
+                ->nullable()
+                ->preserveFilenames(false)
+                ->getUploadedFileNameForStorageUsing(
+                    fn(UploadedFile $file): string =>
+                    Str::random(40) . '.' . $file->getClientOriginalExtension()
+                ),
 
             Forms\Components\TextInput::make('latitude')
                 ->label('Latitude')
@@ -76,9 +86,14 @@ class StadiumResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Logo')
-                    ->disk('public')
+                    ->disk('uploads')
+                    ->visibility('public')
                     ->circular()
-                    ->height(50),
+                    ->height(50)
+                    ->getStateUsing(
+                        fn($record) =>
+                        $record->profile_image ? env('APP_URL') . '/' . ltrim($record->profile_image, '/') : null
+                    ),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
