@@ -57,9 +57,10 @@ class StadiumController extends Controller
         $data = $request->validated();
 
         $stadium->fill([
-            'name' => $data['name'] ?? $stadium->name,
-            'team_id' => $data['team_id'] ?? $stadium->team_id,
-            'location' => $data['location'] ?? $stadium->location,
+            'name'      => $data['name'] ?? $stadium->name,
+            'team_id'   => $data['team_id'] ?? $stadium->team_id,
+            'latitude'  => $data['latitude'] ?? $stadium->latitude,
+            'longitude' => $data['longitude'] ?? $stadium->longitude,
         ]);
 
         File::ensureDirectoryExists(public_path('uploads/stadiums/profile-image'));

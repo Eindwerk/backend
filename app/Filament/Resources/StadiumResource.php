@@ -68,14 +68,13 @@ class StadiumResource extends Resource
                     Str::random(40) . '.' . $file->getClientOriginalExtension()
                 ),
 
-            // Gebruik hier latitude en altitude, niet location.latitude
             Forms\Components\TextInput::make('latitude')
                 ->label('Latitude')
                 ->numeric()
                 ->required(),
 
-            Forms\Components\TextInput::make('altitude')
-                ->label('Altitude')
+            Forms\Components\TextInput::make('longitude')
+                ->label('Longitude')
                 ->numeric()
                 ->required(),
         ]);

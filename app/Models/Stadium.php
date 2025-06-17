@@ -16,19 +16,15 @@ class Stadium extends Model
         'city',
         'image',
         'capacity',
-        'location',
+        'latitude',
+        'longitude',
         'banner_image',
         'team_id',
-    ];
-
-    protected $casts = [
-        'location' => 'array',
     ];
 
     protected $appends = [
         'profile_image',
         'team_name',
-        'location_object',
     ];
 
     /**
@@ -46,6 +42,7 @@ class Stadium extends Model
     {
         return $this->morphToMany(User::class, 'followable', 'follows')->withTimestamps();
     }
+
     /**
      * Het team dat hier speelt.
      */
@@ -68,42 +65,5 @@ class Stadium extends Model
     public function getTeamNameAttribute(): ?string
     {
         return $this->team?->name;
-    }
-
-    /**
-     * Nettere locatie output
-     */
-    public function getLocationObjectAttribute(): array
-    {
-        $location = $this->location ?? [];
-
-        return [
-            'latitude' => $location['latitude'] ?? null,
-            'altitude' => $location['altitude'] ?? null,
-        ];
-    }
-
-    public function getLatitudeAttribute(): ?float
-    {
-        return $this->location['latitude'] ?? null;
-    }
-
-    public function setLatitudeAttribute($value): void
-    {
-        $location = $this->location ?? [];
-        $location['latitude'] = $value;
-        $this->attributes['location'] = json_encode($location);
-    }
-
-    public function getAltitudeAttribute(): ?float
-    {
-        return $this->location['altitude'] ?? null;
-    }
-
-    public function setAltitudeAttribute($value): void
-    {
-        $location = $this->location ?? [];
-        $location['altitude'] = $value;
-        $this->attributes['location'] = json_encode($location);
     }
 }
