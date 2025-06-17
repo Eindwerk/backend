@@ -44,7 +44,7 @@ class PostResource extends JsonResource
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'likes' => LikeResource::collection($this->whenLoaded('likes')),
 
-            'image' => $this->image_path ? url($this->image_path) : null,
+            'image' => $this->image_path,
 
             'title' => optional($this->game?->homeTeam)->name && optional($this->game?->awayTeam)->name && optional($this->game?->stadium)->name
                 ? "{$this->game->homeTeam->name} vs {$this->game->awayTeam->name} – {$this->game->stadium->name}"
