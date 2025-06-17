@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateUserProfileRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -45,35 +45,32 @@ class UserProfileController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        // Gebruikersnaam bijwerken
         if (!empty($data['username'])) {
             $user->username = $data['username'];
         }
 
-        // Zorg dat de folders bestaan
-        File::ensureDirectoryExists(public_path('uploads/users/profile-image'));
-        File::ensureDirectoryExists(public_path('uploads/users/banner-image'));
-
-        // Profielafbeelding uploaden
+        // Profielafbeelding
         if ($request->hasFile('profile_image')) {
-            if ($user->profile_image && File::exists(public_path($user->profile_image))) {
-                File::delete(public_path($user->profile_image));
+            if ($user->profile_image && Storage::disk('public')->exists($user->profile_image)) {
+                Storage::disk('public')->delete($user->profile_image);
             }
 
-            $filename = Str::random(40) . '.' . $request->file('profile_image')->getClientOriginalExtension();
-            $request->file('profile_image')->move(public_path('uploads/users/profile-image'), $filename);
-            $user->profile_image = 'uploads/users/profile-image/' . $filename;
+            $file = $request->file('profile_image');
+            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('users/profile-image', $filename, 'public');
+            $user->profile_image = $path;
         }
 
-        // Bannerafbeelding uploaden
+        // Bannerafbeelding
         if ($request->hasFile('banner_image')) {
-            if ($user->banner_image && File::exists(public_path($user->banner_image))) {
-                File::delete(public_path($user->banner_image));
+            if ($user->banner_image && Storage::disk('public')->exists($user->banner_image)) {
+                Storage::disk('public')->delete($user->banner_image);
             }
 
-            $filename = Str::random(40) . '.' . $request->file('banner_image')->getClientOriginalExtension();
-            $request->file('banner_image')->move(public_path('uploads/users/banner-image'), $filename);
-            $user->banner_image = 'uploads/users/banner-image/' . $filename;
+            $file = $request->file('banner_image');
+            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('users/banner-image', $filename, 'public');
+            $user->banner_image = $path;
         }
 
         $user->save();

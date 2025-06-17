@@ -14,9 +14,9 @@ class Team extends Model
 
     protected $fillable = [
         'name',
-        'logo_url',
-        'league_id',
+        'profile_image',
         'banner_image',
+        'league_id',
     ];
 
     public function homeGames(): HasMany

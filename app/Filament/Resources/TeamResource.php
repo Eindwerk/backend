@@ -38,35 +38,53 @@ class TeamResource extends Resource
                 ->required()
                 ->searchable(),
 
-            Forms\Components\FileUpload::make('logo_url')
+            Forms\Components\FileUpload::make('profile_image')
                 ->label('Logo')
                 ->disk('public')
-                ->directory('uploads/teams/profile-image')
+                ->directory('teams/profile-image')
                 ->image()
+                ->imageEditor()
                 ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->maxSize(1024)
-                ->nullable()
                 ->preserveFilenames(false)
-                ->getUploadedFileNameForStorageUsing(
-                    fn(UploadedFile $file): string =>
-                    Str::random(40) . '.' . $file->getClientOriginalExtension()
-                ),
+                ->dehydrated(true)
+                ->required(false)
+                ->rules(['image', 'max:1024']) // max 1MB
+                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {
+                    return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+                })
+                ->deleteUploadedFileUsing(function (?string $filePath) {
+                    if ($filePath) {
+                        $fullPath = storage_path('app/public/' . $filePath);
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
+                        }
+                    }
+                }),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
                 ->disk('public')
-                ->directory('uploads/teams/banner-image')
+                ->directory('teams/banner-image')
                 ->image()
+                ->imageEditor()
                 ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->maxSize(4096)
-                ->nullable()
                 ->preserveFilenames(false)
-                ->getUploadedFileNameForStorageUsing(
-                    fn(UploadedFile $file): string =>
-                    Str::random(40) . '.' . $file->getClientOriginalExtension()
-                ),
+                ->dehydrated(true)
+                ->required(false)
+                ->rules(['image', 'max:4096']) // max 4MB
+                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {
+                    return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+                })
+                ->deleteUploadedFileUsing(function (?string $filePath) {
+                    if ($filePath) {
+                        $fullPath = storage_path('app/public/' . $filePath);
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
+                        }
+                    }
+                }),
         ]);
     }
 
@@ -74,16 +92,12 @@ class TeamResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('logo_url')
+                Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Logo')
                     ->disk('public')
                     ->visibility('public')
                     ->height(50)
-                    ->circular()
-                    ->getStateUsing(
-                        fn($record) =>
-                        $record->logo_url ? env('APP_URL') . '/' . ltrim($record->logo_url, '/') : null
-                    ),
+                    ->circular(),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),

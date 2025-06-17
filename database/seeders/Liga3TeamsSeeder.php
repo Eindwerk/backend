@@ -36,7 +36,7 @@ class Liga3TeamsSeeder extends Seeder
             Team::create([
                 'name' => $name,
                 'league_id' => 3,
-                'logo_url' => null,
+                'profile_image' => null,
                 'banner_image' => null,
             ]);
         }

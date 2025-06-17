@@ -14,17 +14,12 @@ class Stadium extends Model
     protected $fillable = [
         'name',
         'city',
-        'image',
+        'profile_image',
         'capacity',
         'latitude',
         'longitude',
         'banner_image',
         'team_id',
-    ];
-
-    protected $appends = [
-        'profile_image',
-        'team_name',
     ];
 
     /**
@@ -49,14 +44,6 @@ class Stadium extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
-    }
-
-    /**
-     * Profile image van het team (logo)
-     */
-    public function getProfileImageAttribute(): ?string
-    {
-        return $this->team?->logo_url;
     }
 
     /**

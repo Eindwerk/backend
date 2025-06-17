@@ -120,8 +120,6 @@ class GameController extends Controller
      *             @OA\Property(property="stadium_id", type="integer", example=1),
      *             @OA\Property(property="home_team_id", type="integer", example=2),
      *             @OA\Property(property="away_team_id", type="integer", example=3),
-     *             @OA\Property(property="home_score", type="integer", nullable=true, example=3),
-     *             @OA\Property(property="away_score", type="integer", nullable=true, example=0),
      *             @OA\Property(property="match_date", type="string", format="date", example="2025-05-20")
      *         )
      *     ),

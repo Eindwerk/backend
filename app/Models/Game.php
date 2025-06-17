@@ -15,8 +15,6 @@ class Game extends Model
         'stadium_id',
         'home_team_id',
         'away_team_id',
-        'home_score',
-        'away_score',
         'match_date',
     ];
 
@@ -24,8 +22,6 @@ class Game extends Model
         'stadium_id'    => 'integer',
         'home_team_id'  => 'integer',
         'away_team_id'  => 'integer',
-        'home_score'    => 'integer',
-        'away_score'    => 'integer',
         'match_date'    => 'datetime',
     ];
 

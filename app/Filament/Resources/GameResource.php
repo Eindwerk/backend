@@ -46,15 +46,6 @@ class GameResource extends Resource
                 ->label('Datum & tijd')
                 ->required(),
 
-            Forms\Components\TextInput::make('home_score')
-                ->label('Score thuisploeg')
-                ->numeric()
-                ->minValue(0),
-
-            Forms\Components\TextInput::make('away_score')
-                ->label('Score uitploeg')
-                ->numeric()
-                ->minValue(0),
         ]);
     }
 
@@ -80,14 +71,6 @@ class GameResource extends Resource
             Tables\Columns\TextColumn::make('match_date')
                 ->label('Datum')
                 ->dateTime()
-                ->sortable(),
-
-            Tables\Columns\TextColumn::make('home_score')
-                ->label('Thuis')
-                ->sortable(),
-
-            Tables\Columns\TextColumn::make('away_score')
-                ->label('Uit')
                 ->sortable(),
         ])
             ->actions([

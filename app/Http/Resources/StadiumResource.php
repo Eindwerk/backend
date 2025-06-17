@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @OA\Schema(
@@ -28,8 +29,8 @@ class StadiumResource extends JsonResource
             'id'            => $this->id,
             'name'          => $this->name,
             'team_name'     => $this->team?->name,
-            'profile_image' => $this->profile_image,
-            'banner_image'  => $this->banner_image,
+            'profile_image' => $this->profile_image ? url($this->profile_image) : null,
+            'banner_image'  => $this->banner_image ? Storage::url($this->banner_image) : null,
             'latitude'      => $this->latitude,
             'longitude'     => $this->longitude,
             'created_at'    => $this->created_at,

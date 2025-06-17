@@ -14,10 +14,10 @@ class StoreTeamRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'league' => ['required', 'string', 'max:255'],
-            'logo_url' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
-            'banner_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
+            'name'          => ['required', 'string', 'max:255'],
+            'league_id'     => ['required', 'exists:leagues,id'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'banner_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
         ];
     }
 }

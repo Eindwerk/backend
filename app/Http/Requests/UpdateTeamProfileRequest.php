@@ -14,10 +14,10 @@ class UpdateTeamProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'         => ['sometimes', 'string', 'max:255'],
-            'league'       => ['sometimes', 'string', 'max:255'],
-            'logo_url'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
-            'banner_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
+            'name'           => ['sometimes', 'string', 'max:255'],
+            'league_id'      => ['sometimes', 'exists:leagues,id'],
+            'profile_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'banner_image'   => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
         ];
     }
 }

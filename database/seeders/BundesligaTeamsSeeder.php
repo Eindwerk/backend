@@ -34,7 +34,7 @@ class BundesligaTeamsSeeder extends Seeder
             Team::create([
                 'name' => $name,
                 'league_id' => 1,
-                'logo_url' => null,
+                'profile_image' => null,
                 'banner_image' => null,
             ]);
         }

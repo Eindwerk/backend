@@ -28,12 +28,12 @@ class UserResource extends Resource
         return $form->schema([
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Profielfoto')
-                ->disk('uploads')
+                ->disk('public')
                 ->directory('uploads/users/profile-image')
                 ->image()
                 ->imagePreviewHeight(150)
                 ->visibility('public')
-                ->maxSize(2048)
+                ->maxSize(8192)
                 ->nullable()
                 ->preserveFilenames(false)
                 ->getUploadedFileNameForStorageUsing(
@@ -43,12 +43,12 @@ class UserResource extends Resource
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
-                ->disk('uploads')
+                ->disk('public')
                 ->directory('uploads/users/banner-image')
                 ->image()
                 ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->maxSize(4096)
+                ->maxSize(15360)
                 ->nullable()
                 ->preserveFilenames(false)
                 ->getUploadedFileNameForStorageUsing(
@@ -74,15 +74,11 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
-                    ->label('Profielfoto')
-                    ->disk('uploads')
+                    ->label('Logo')
+                    ->disk('public')
                     ->visibility('public')
-                    ->circular()
-                    ->height(40)
-                    ->getStateUsing(
-                        fn($record) =>
-                        $record->profile_image ? env('APP_URL') . '/' . ltrim($record->profile_image, '/') : null
-                    ),
+                    ->height(50)
+                    ->circular(),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),

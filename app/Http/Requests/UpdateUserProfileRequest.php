@@ -21,8 +21,8 @@ class UpdateUserProfileRequest extends FormRequest
                 'max:255',
                 new UniqueUsernameAcrossTables($this->user()->id),
             ],
-            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:8192'],
-            'banner_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:15360'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'banner_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
         ];
     }
 

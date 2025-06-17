@@ -9,11 +9,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\File;
 
 class StadiumResource extends Resource
 {
@@ -49,50 +48,52 @@ class StadiumResource extends Resource
                 ->numeric(),
 
             Forms\Components\FileUpload::make('profile_image')
-                ->label('Profielafbeelding')
+                ->label('Logo')
                 ->disk('public')
-                ->directory('uploads/stadiums/profile-image')
+                ->directory('stadiums/profile-image')
                 ->image()
+                ->imageEditor()
                 ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->maxSize(2048)
-                ->nullable()
                 ->preserveFilenames(false)
-                ->getUploadedFileNameForStorageUsing(
-                    fn(UploadedFile $file): string =>
-                    Str::random(40) . '.' . $file->getClientOriginalExtension()
-                )
-                // Verwijder oude afbeelding bij upload
-                ->dehydrateStateUsing(function ($state, callable $get, ?Model $record) {
-                    if ($record && $state && $state !== $record->profile_image) {
-                        if ($record->profile_image && File::exists(public_path($record->profile_image))) {
-                            File::delete(public_path($record->profile_image));
+                ->dehydrated(true)
+                ->required(false)
+                ->rules(['image', 'max:1024']) // max 1MB
+                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {
+                    return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+                })
+                ->deleteUploadedFileUsing(function (?string $filePath) {
+                    if ($filePath) {
+                        $fullPath = storage_path('app/public/' . $filePath);
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
                         }
                     }
-                    return $state;
-                }),
+                })
+                ->dehydrated(fn($state) => filled($state)),
 
             Forms\Components\FileUpload::make('banner_image')
-                ->label('Bannerafbeelding')
+                ->label('Banner')
                 ->disk('public')
-                ->directory('uploads/stadiums/banner-image')
+                ->directory('stadiums/banner-image')
                 ->image()
+                ->imageEditor()
                 ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->maxSize(4096)
-                ->nullable()
                 ->preserveFilenames(false)
-                ->getUploadedFileNameForStorageUsing(
-                    fn(UploadedFile $file): string =>
-                    Str::random(40) . '.' . $file->getClientOriginalExtension()
-                )
-                ->dehydrateStateUsing(function ($state, callable $get, ?Model $record) {
-                    if ($record && $state && $state !== $record->banner_image) {
-                        if ($record->banner_image && File::exists(public_path($record->banner_image))) {
-                            File::delete(public_path($record->banner_image));
+                ->dehydrated(true)
+                ->required(false)
+                ->rules(['image', 'max:4096']) // max 4MB
+                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {
+                    return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+                })
+                ->deleteUploadedFileUsing(function (?string $filePath) {
+                    if ($filePath) {
+                        $fullPath = storage_path('app/public/' . $filePath);
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
                         }
                     }
-                    return $state;
                 }),
         ]);
     }
@@ -102,18 +103,11 @@ class StadiumResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
-                    ->label('Profielafbeelding')
+                    ->label('Logo')
                     ->disk('public')
                     ->visibility('public')
                     ->height(50)
-                    ->getStateUsing(fn($record) => $record->profile_image ? env('APP_URL') . '/' . ltrim($record->profile_image, '/') : null),
-
-                Tables\Columns\ImageColumn::make('banner_image')
-                    ->label('Banner')
-                    ->disk('public')
-                    ->visibility('public')
-                    ->height(50)
-                    ->getStateUsing(fn($record) => $record->banner_image ? env('APP_URL') . '/' . ltrim($record->banner_image, '/') : null),
+                    ->circular(),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
@@ -122,21 +116,17 @@ class StadiumResource extends Resource
                 Tables\Columns\TextColumn::make('longitude')->label('Longitude'),
                 Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
             ])
+            ->filters([
+                SelectFilter::make('team_id')
+                    ->label('Team')
+                    ->relationship('team', 'name')
+                    ->searchable(),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make()
-                    ->before(function ($records) {
-                        foreach ($records as $stadium) {
-                            if ($stadium->profile_image && File::exists(public_path($stadium->profile_image))) {
-                                File::delete(public_path($stadium->profile_image));
-                            }
-                            if ($stadium->banner_image && File::exists(public_path($stadium->banner_image))) {
-                                File::delete(public_path($stadium->banner_image));
-                            }
-                        }
-                    }),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
