@@ -40,7 +40,7 @@ class TeamResource extends Resource
 
             Forms\Components\FileUpload::make('logo_url')
                 ->label('Logo')
-                ->disk('public') // Let op: 'public' verwijst naar 'public' disk in config/filesystems.php
+                ->disk('public')
                 ->directory('uploads/teams/profile-image')
                 ->image()
                 ->imagePreviewHeight(100)
