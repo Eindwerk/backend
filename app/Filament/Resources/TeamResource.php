@@ -40,7 +40,7 @@ class TeamResource extends Resource
 
             Forms\Components\FileUpload::make('logo_url')
                 ->label('Logo')
-                ->disk('uploads')
+                ->disk('public') // Let op: 'public' verwijst naar 'public' disk in config/filesystems.php
                 ->directory('uploads/teams/profile-image')
                 ->image()
                 ->imagePreviewHeight(100)
@@ -55,7 +55,7 @@ class TeamResource extends Resource
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
-                ->disk('uploads')
+                ->disk('public')
                 ->directory('uploads/teams/banner-image')
                 ->image()
                 ->imagePreviewHeight(100)
@@ -76,7 +76,7 @@ class TeamResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('logo_url')
                     ->label('Logo')
-                    ->disk('uploads')
+                    ->disk('public')
                     ->visibility('public')
                     ->height(50)
                     ->circular()
