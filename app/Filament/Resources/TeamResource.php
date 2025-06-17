@@ -12,7 +12,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 
 class TeamResource extends Resource
 {
@@ -39,25 +40,33 @@ class TeamResource extends Resource
 
             Forms\Components\FileUpload::make('logo_url')
                 ->label('Logo')
-                ->disk('public')
+                ->disk('uploads')
                 ->directory('uploads/teams/profile-image')
                 ->image()
                 ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->preserveFilenames()
                 ->maxSize(1024)
-                ->nullable(),
+                ->nullable()
+                ->preserveFilenames(false)
+                ->getUploadedFileNameForStorageUsing(
+                    fn(UploadedFile $file): string =>
+                    Str::random(40) . '.' . $file->getClientOriginalExtension()
+                ),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
-                ->disk('public')
+                ->disk('uploads')
                 ->directory('uploads/teams/banner-image')
                 ->image()
                 ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->preserveFilenames()
                 ->maxSize(4096)
-                ->nullable(),
+                ->nullable()
+                ->preserveFilenames(false)
+                ->getUploadedFileNameForStorageUsing(
+                    fn(UploadedFile $file): string =>
+                    Str::random(40) . '.' . $file->getClientOriginalExtension()
+                ),
         ]);
     }
 
@@ -67,18 +76,14 @@ class TeamResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('logo_url')
                     ->label('Logo')
-                    ->disk('public')
+                    ->disk('uploads')
                     ->visibility('public')
                     ->height(50)
                     ->circular()
-                    ->getStateUsing(function ($record) {
-                        $path = $record->logo_url;
-                        if ($path) {
-                            return 'https://admin.groundpass.be/' . ltrim($path, '/');
-                        }
-                        return null;
-                    }),
-
+                    ->getStateUsing(
+                        fn($record) =>
+                        $record->logo_url ? env('APP_URL') . '/' . ltrim($record->logo_url, '/') : null
+                    ),
 
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
