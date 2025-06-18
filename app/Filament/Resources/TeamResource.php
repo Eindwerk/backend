@@ -10,10 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class TeamResource extends Resource
 {
@@ -40,45 +37,19 @@ class TeamResource extends Resource
 
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Logo')
-                ->disk('public')
-                ->directory('teams/profile-image')
                 ->image()
-                ->imageEditor()
-                ->imagePreviewHeight(100)
-                ->visibility('public')
-                ->preserveFilenames(false)
-                ->dehydrated(true)
-                ->required(false)
-                ->rules(['image', 'max:1024']) // max 1MB
-                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {
-                    return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-                })
-                ->deleteUploadedFileUsing(function (?string $filePath) {
-                    if ($filePath && Storage::disk('public')->exists($filePath)) {
-                        Storage::disk('public')->delete($filePath);
-                    }
-                }),
+                ->directory('teams/profile-image')
+                ->disk('public')
+                ->maxSize(1024)
+                ->required(false),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
-                ->disk('public')
-                ->directory('teams/banner-image')
                 ->image()
-                ->imageEditor()
-                ->imagePreviewHeight(100)
-                ->visibility('public')
-                ->preserveFilenames(false)
-                ->dehydrated(true)
-                ->required(false)
-                ->rules(['image', 'max:4096']) // max 4MB
-                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {
-                    return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-                })
-                ->deleteUploadedFileUsing(function (?string $filePath) {
-                    if ($filePath && Storage::disk('public')->exists($filePath)) {
-                        Storage::disk('public')->delete($filePath);
-                    }
-                }),
+                ->directory('teams/banner-image')
+                ->disk('public')
+                ->maxSize(4096)
+                ->required(false),
         ]);
     }
 
@@ -89,11 +60,9 @@ class TeamResource extends Resource
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Logo')
                     ->disk('public')
-                    ->visibility('public')
                     ->height(50)
                     ->circular(),
 
-                Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Naam')->searchable(),
                 Tables\Columns\TextColumn::make('league.name')->label('Competitie')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Aangemaakt op')->dateTime()->sortable(),
@@ -126,7 +95,7 @@ class TeamResource extends Resource
         return self::isAdmin();
     }
 
-    public static function canView(Model $record): bool
+    public static function canView($record): bool
     {
         return self::isAdmin();
     }
@@ -136,12 +105,12 @@ class TeamResource extends Resource
         return self::isAdmin();
     }
 
-    public static function canEdit(Model $record): bool
+    public static function canEdit($record): bool
     {
         return self::isAdmin();
     }
 
-    public static function canDelete(Model $record): bool
+    public static function canDelete($record): bool
     {
         return self::isSuperAdmin();
     }
