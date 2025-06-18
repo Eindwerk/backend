@@ -9,12 +9,14 @@ class PostResource extends JsonResource
 {
     public function toArray($request): array
     {
+        $this->loadMissing(['comments', 'likes']);
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
             'game' => new GameResource($this->whenLoaded('game')),
-            'comments' => CommentResource::collection($this->whenLoaded('comments') ?? []),
-            'likes' => LikeResource::collection($this->whenLoaded('likes') ?? []),
+            'comments' => CommentResource::collection($this->comments ?? []),
+            'likes' => LikeResource::collection($this->likes ?? []),
             'image' => $this->image ? Storage::url($this->image) : null,
             'title' => $this->game && $this->game->homeTeam && $this->game->awayTeam
                 ? "{$this->game->homeTeam->name} vs {$this->game->awayTeam->name}"
