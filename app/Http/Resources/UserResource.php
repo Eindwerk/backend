@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class UserResource extends JsonResource
 {
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         /** @var \Illuminate\Contracts\Filesystem\Cloud $disk */
         $disk = Storage::disk('s3');

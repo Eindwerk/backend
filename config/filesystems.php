@@ -46,6 +46,7 @@ return [
         ],
 
         's3' => [
+            'visibility' => 'public',
             'driver' => 's3',
             'key' => env('DO_SPACES_KEY'),
             'secret' => env('DO_SPACES_SECRET'),
