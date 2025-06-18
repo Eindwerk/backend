@@ -28,7 +28,7 @@ class UserResource extends Resource
                 ->label('Profielfoto')
                 ->image()
                 ->disk('s3')
-                ->directory('uploads/users/profile-image')
+                ->directory('users/profile-image')
                 ->required(false)
                 ->maxSize(8192), // 8MB
 
@@ -36,7 +36,7 @@ class UserResource extends Resource
                 ->label('Banner')
                 ->image()
                 ->disk('s3')
-                ->directory('uploads/users/banner-image')
+                ->directory('users/banner-image')
                 ->required(false)
                 ->maxSize(15360), // 15MB
 

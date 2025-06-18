@@ -21,12 +21,12 @@ class UserProfileController extends Controller
 
         if ($request->hasFile('profile_image')) {
             $this->deleteImageIfExists($user->profile_image);
-            $user->profile_image = $this->storeImage($request->file('profile_image'), 'uploads/users/profile-image');
+            $user->profile_image = $this->storeImage($request->file('profile_image'), 'users/profile-image');
         }
 
         if ($request->hasFile('banner_image')) {
             $this->deleteImageIfExists($user->banner_image);
-            $user->banner_image = $this->storeImage($request->file('banner_image'), 'uploads/users/banner-image');
+            $user->banner_image = $this->storeImage($request->file('banner_image'), 'users/banner-image');
         }
 
         $user->save();
