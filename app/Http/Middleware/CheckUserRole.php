@@ -10,9 +10,11 @@ class CheckUserRole
 {
     public function handle(Request $request, Closure $next)
     {
-        // Controleer of de gebruiker een 'USER' is
+        if ($request->is('filament/*')) {
+            return $next($request);
+        }
+
         if (Auth::check() && Auth::user()->role === 'user') {
-            // Redirect 'USER' naar een andere pagina
             return redirect('/');
         }
 

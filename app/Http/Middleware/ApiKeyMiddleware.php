@@ -11,6 +11,10 @@ class ApiKeyMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->is('filament/*')) {
+            return $next($request);
+        }
+
         $key = $request->header('X-API-KEY');
 
         if (!$key || !ApiKey::where('key', $key)->exists()) {

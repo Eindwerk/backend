@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -12,7 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\FrontendVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 {
     use HasFactory;
     use HasApiTokens, Notifiable;
@@ -129,5 +130,21 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->save();
 
         $this->notify(new FrontendVerifyEmail($plainToken));
+    }
+
+    /**
+     * Filament toegang controleren
+     */
+    public function canAccessFilament(): bool
+    {
+        return in_array($this->role, ['admin', 'super_admin']);
+    }
+
+    /**
+     * Alias voor Intelephense en backward compatibility
+     */
+    public function canAccessPanel($panel): bool
+    {
+        return $this->canAccessFilament();
     }
 }

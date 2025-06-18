@@ -13,6 +13,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+
+        // Voeg je CheckUserRole middleware toe aan de web middleware groep
+        $middleware->web(append: [
+            \App\Http\Middleware\CheckUserRole::class,
+        ]);
+
+        // Voeg ApiKeyMiddleware toe aan api middleware groep
+        $middleware->api(append: [
+            \App\Http\Middleware\ApiKeyMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
