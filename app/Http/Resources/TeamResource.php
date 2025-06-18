@@ -27,7 +27,7 @@ class TeamResource extends JsonResource
             'id'            => $this->id,
             'name'          => $this->name,
             'league_id'     => $this->league_id,
-            'profile_image' => $this->profile_image ? url($this->profile_image) : null,
+            'profile_image' => $this->profile_image ? Storage::url($this->profile_image) : null,
             'banner_image'  => $this->banner_image ? Storage::url($this->banner_image) : null,
             'created_at'    => $this->created_at,
             'updated_at'    => $this->updated_at,
