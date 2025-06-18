@@ -38,17 +38,13 @@ class TeamResource extends Resource
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Logo')
                 ->image()
-                ->directory('teams/profile-image')
                 ->disk('public')
-                ->maxSize(1024)
                 ->required(false),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
                 ->image()
-                ->directory('teams/banner-image')
                 ->disk('public')
-                ->maxSize(4096)
                 ->required(false),
         ]);
     }
