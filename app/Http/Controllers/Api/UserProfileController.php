@@ -19,35 +19,18 @@ class UserProfileController extends Controller
             $user->username = $data['username'];
         }
 
-        // Profielafbeelding
         if ($request->hasFile('profile_image')) {
-            if ($user->profile_image && Storage::disk('public')->exists($user->profile_image)) {
-                Storage::disk('public')->delete($user->profile_image);
-            }
-
-            $file = $request->file('profile_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('uploads/users/profile-image', $filename, 'public');
-            $user->profile_image = $path;
+            $this->deleteImageIfExists($user->profile_image);
+            $user->profile_image = $this->storeImage($request->file('profile_image'), 'users/profile-image');
         }
 
-        // Bannerafbeelding
         if ($request->hasFile('banner_image')) {
-            if ($user->banner_image && Storage::disk('public')->exists($user->banner_image)) {
-                Storage::disk('public')->delete($user->banner_image);
-            }
-
-            $file = $request->file('banner_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('uploads/users/banner-image', $filename, 'public');
-            $user->banner_image = $path;
+            $this->deleteImageIfExists($user->banner_image);
+            $user->banner_image = $this->storeImage($request->file('banner_image'), 'users/banner-image');
         }
 
         $user->save();
 
-        return response()->json([
-            'message' => 'Profiel succesvol bijgewerkt.',
-            'user' => new UserResource($user),
-        ]);
+        return response()->json(new UserResource($user));
     }
 }
