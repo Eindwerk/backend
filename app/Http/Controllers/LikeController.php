@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LikeRequest;
 use App\Http\Resources\LikeResource;
 use App\Models\Like;
+use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
 
 /**
  * @OA\Tag(
@@ -45,6 +47,18 @@ class LikeController extends Controller
             'user_id' => Auth::id(),
             'post_id' => $validated['post_id'],
         ]);
+
+        $post = Post::find($validated['post_id']);
+
+        // Na het aanmaken van de like:
+        if ($post->user_id !== Auth::id()) {
+            Notification::create([
+                'user_id' => $post->user_id,
+                'sender_id' => Auth::id(),
+                'type' => 'like',
+                'post_id' => $post->id,
+            ]);
+        }
 
         return response()->json(new LikeResource($like), 201);
     }

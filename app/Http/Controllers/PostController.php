@@ -8,6 +8,7 @@ use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Notification;
 
 /**
  * @OA\Tag(
@@ -64,6 +65,18 @@ class PostController extends Controller
             'game_id' => $data['game_id'],
             'image' => $data['image'] ?? null,
         ]);
+
+        // Na het aanmaken van de post:
+        $user = Auth::user();
+        foreach ($user->friendships as $friendship) {
+            $friend = $friendship->friend;
+            Notification::create([
+                'user_id' => $friend->id,
+                'sender_id' => $user->id,
+                'type' => 'friend_post',
+                'post_id' => $post->id,
+            ]);
+        }
 
         $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes']);
 
