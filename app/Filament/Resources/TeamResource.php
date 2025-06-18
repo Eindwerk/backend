@@ -38,13 +38,11 @@ class TeamResource extends Resource
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Logo')
                 ->image()
-                ->disk('public')
                 ->required(false),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
                 ->image()
-                ->disk('public')
                 ->required(false),
         ]);
     }
@@ -55,7 +53,6 @@ class TeamResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Logo')
-                    ->disk('public')
                     ->height(50)
                     ->circular(),
 
