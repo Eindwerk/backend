@@ -33,4 +33,17 @@ class UserProfileController extends Controller
 
         return response()->json(new UserResource($user));
     }
+
+    protected function deleteImageIfExists(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    protected function storeImage($file, string $directory): string
+    {
+        $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+        return $file->storeAs($directory, $filename, 'public');
+    }
 }
