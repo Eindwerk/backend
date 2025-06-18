@@ -15,7 +15,7 @@ class Post extends Model
         'user_id',
         'game_id',
         'stadium_id',
-        'image_path',
+        'image',
     ];
 
     public function user(): BelongsTo

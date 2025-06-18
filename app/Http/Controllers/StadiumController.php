@@ -7,8 +7,6 @@ use App\Http\Resources\StadiumResource;
 use App\Models\Stadium;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 
 /**
  * @OA\Tag(
@@ -31,15 +29,13 @@ class StadiumController extends Controller
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
             $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('stadiums/profile-image', $filename, 'public');
-            $data['profile_image'] = $path;
+            $data['profile_image'] = $file->storeAs('uploads/stadiums/profile-image', $filename, 'public');
         }
 
         if ($request->hasFile('banner_image')) {
             $file = $request->file('banner_image');
             $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('stadiums/banner-image', $filename, 'public');
-            $data['banner_image'] = $path;
+            $data['banner_image'] = $file->storeAs('uploads/stadiums/banner-image', $filename, 'public');
         }
 
         $stadium = Stadium::create($data);
@@ -70,8 +66,7 @@ class StadiumController extends Controller
 
             $file = $request->file('profile_image');
             $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('stadiums/profile-image', $filename, 'public');
-            $stadium->profile_image = $path;
+            $stadium->profile_image = $file->storeAs('uploads/stadiums/profile-image', $filename, 'public');
         }
 
         if ($request->hasFile('banner_image')) {
@@ -81,8 +76,7 @@ class StadiumController extends Controller
 
             $file = $request->file('banner_image');
             $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('stadiums/banner-image', $filename, 'public');
-            $stadium->banner_image = $path;
+            $stadium->banner_image = $file->storeAs('uploads/stadiums/banner-image', $filename, 'public');
         }
 
         $stadium->save();

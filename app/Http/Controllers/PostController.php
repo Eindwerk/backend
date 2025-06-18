@@ -56,12 +56,11 @@ class PostController extends Controller
     {
         $data = $request->validated();
 
-        File::ensureDirectoryExists(public_path('uploads/posts'));
-
+        // Upload naar Laravel Storage 'public' disk consistent?
         if ($request->hasFile('image')) {
-            $filename = Str::random(40) . '.' . $request->file('image')->getClientOriginalExtension();
-            $request->file('image')->move(public_path('uploads/posts'), $filename);
-            $data['image_path'] = 'uploads/posts/' . $filename;
+            $file = $request->file('image');
+            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+            $data['image_path'] = $file->storeAs('uploads/posts/images', $filename, 'public');
         }
 
         $post = Post::create([
@@ -89,19 +88,17 @@ class PostController extends Controller
 
         $data = $request->validated();
 
-        File::ensureDirectoryExists(public_path('uploads/posts'));
-
         if ($request->hasFile('image')) {
             if ($post->image_path && File::exists(public_path($post->image_path))) {
                 File::delete(public_path($post->image_path));
             }
 
-            $filename = Str::random(40) . '.' . $request->file('image')->getClientOriginalExtension();
-            $request->file('image')->move(public_path('uploads/posts'), $filename);
-            $data['image_path'] = 'uploads/posts/' . $filename;
+            $file = $request->file('image');
+            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+            $data['image_path'] = $file->storeAs('uploads/posts/images', $filename, 'public');
         }
 
-        // Zorg dat content niet geüpdatet wordt (weggehaald)
+        // Content niet updaten
         unset($data['content']);
 
         $post->update($data);

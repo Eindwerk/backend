@@ -29,8 +29,8 @@ class TeamResource extends JsonResource
             'league_id'     => $this->league_id,
             'profile_image' => $this->profile_image ? Storage::url($this->profile_image) : null,
             'banner_image'  => $this->banner_image ? Storage::url($this->banner_image) : null,
-            'created_at'    => $this->created_at,
-            'updated_at'    => $this->updated_at,
+            'created_at'    => $this->created_at?->toIso8601String(),
+            'updated_at'    => $this->updated_at?->toIso8601String(),
         ];
     }
 }

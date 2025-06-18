@@ -8,9 +8,6 @@ use App\Http\Resources\TeamResource;
 use App\Models\Team;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 
 /**
  * @OA\Tag(
@@ -30,18 +27,14 @@ class TeamController extends Controller
     {
         $data = $request->validated();
 
+        // Upload en sla profiel afbeelding op
         if ($request->hasFile('profile_image')) {
-            $file = $request->file('profile_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('teams/profile-image', $filename, 'public');
-            $data['profile_image'] = $path;
+            $data['profile_image'] = $this->storeImage($request->file('profile_image'), 'teams/profile-image');
         }
 
+        // Upload en sla banner afbeelding op
         if ($request->hasFile('banner_image')) {
-            $file = $request->file('banner_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('teams/banner-image', $filename, 'public');
-            $data['banner_image'] = $path;
+            $data['banner_image'] = $this->storeImage($request->file('banner_image'), 'teams/banner-image');
         }
 
         $team = Team::create($data);
@@ -64,25 +57,13 @@ class TeamController extends Controller
         ]);
 
         if ($request->hasFile('profile_image')) {
-            if ($team->profile_image && Storage::disk('public')->exists($team->profile_image)) {
-                Storage::disk('public')->delete($team->profile_image);
-            }
-
-            $file = $request->file('profile_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('teams/profile-image', $filename, 'public');
-            $team->profile_image = $path;
+            $this->deleteImageIfExists($team->profile_image);
+            $team->profile_image = $this->storeImage($request->file('profile_image'), 'teams/profile-image');
         }
 
         if ($request->hasFile('banner_image')) {
-            if ($team->banner_image && Storage::disk('public')->exists($team->banner_image)) {
-                Storage::disk('public')->delete($team->banner_image);
-            }
-
-            $file = $request->file('banner_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('teams/banner-image', $filename, 'public');
-            $team->banner_image = $path;
+            $this->deleteImageIfExists($team->banner_image);
+            $team->banner_image = $this->storeImage($request->file('banner_image'), 'teams/banner-image');
         }
 
         $team->save();
@@ -92,16 +73,30 @@ class TeamController extends Controller
 
     public function destroy(Team $team): JsonResponse
     {
-        if ($team->profile_image && Storage::disk('public')->exists($team->profile_image)) {
-            Storage::disk('public')->delete($team->profile_image);
-        }
-
-        if ($team->banner_image && Storage::disk('public')->exists($team->banner_image)) {
-            Storage::disk('public')->delete($team->banner_image);
-        }
+        $this->deleteImageIfExists($team->profile_image);
+        $this->deleteImageIfExists($team->banner_image);
 
         $team->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Helper: upload afbeelding met md5 bestandsnaam
+     */
+    protected function storeImage($file, string $directory): string
+    {
+        $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
+        return $file->storeAs($directory, $filename, 'public');
+    }
+
+    /**
+     * Helper: verwijder afbeelding als die bestaat
+     */
+    protected function deleteImageIfExists(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 }

@@ -8,35 +8,6 @@ use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
-/**
- * @OA\Post(
- *     path="/api/users/profile",
- *     summary="Update het profiel van de ingelogde gebruiker",
- *     tags={"Profiel"},
- *     security={{"sanctum":{}}},
- *     @OA\RequestBody(
- *         required=false,
- *         @OA\MediaType(
- *             mediaType="multipart/form-data",
- *             @OA\Schema(
- *                 @OA\Property(property="username", type="string", example="cedric_123"),
- *                 @OA\Property(property="profile_image", type="file"),
- *                 @OA\Property(property="banner_image", type="file")
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Profiel succesvol bijgewerkt",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Profiel succesvol bijgewerkt."),
- *             @OA\Property(property="user", ref="#/components/schemas/User")
- *         )
- *     ),
- *     @OA\Response(response=422, description="Validatiefout"),
- *     @OA\Response(response=401, description="Niet geauthenticeerd")
- * )
- */
 class UserProfileController extends Controller
 {
     public function update(UpdateUserProfileRequest $request): JsonResponse
@@ -56,7 +27,7 @@ class UserProfileController extends Controller
 
             $file = $request->file('profile_image');
             $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('users/profile-image', $filename, 'public');
+            $path = $file->storeAs('uploads/users/profile-image', $filename, 'public');
             $user->profile_image = $path;
         }
 
@@ -68,7 +39,7 @@ class UserProfileController extends Controller
 
             $file = $request->file('banner_image');
             $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('users/banner-image', $filename, 'public');
+            $path = $file->storeAs('uploads/users/banner-image', $filename, 'public');
             $user->banner_image = $path;
         }
 

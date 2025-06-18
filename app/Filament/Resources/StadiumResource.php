@@ -56,7 +56,7 @@ class StadiumResource extends Resource
                 ->imagePreviewHeight(100)
                 ->visibility('public')
                 ->preserveFilenames(false)
-                ->dehydrated(true)
+                ->dehydrated(true) // <-- toegevoegd voor consistentie
                 ->required(false)
                 ->rules(['image', 'max:1024']) // max 1MB
                 ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {

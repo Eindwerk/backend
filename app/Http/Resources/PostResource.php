@@ -29,12 +29,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class PostResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array<string, mixed>
-     */
     public function toArray($request): array
     {
         return [
@@ -44,14 +38,14 @@ class PostResource extends JsonResource
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'likes' => LikeResource::collection($this->whenLoaded('likes')),
 
-            'image' => $this->image_path,
+            'image' => $this->image_path ? url($this->image_path) : null,
 
             'title' => optional($this->game?->homeTeam)->name && optional($this->game?->awayTeam)->name && optional($this->game?->stadium)->name
                 ? "{$this->game->homeTeam->name} vs {$this->game->awayTeam->name} – {$this->game->stadium->name}"
                 : null,
 
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

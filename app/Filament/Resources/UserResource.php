@@ -33,13 +33,22 @@ class UserResource extends Resource
                 ->image()
                 ->imagePreviewHeight(150)
                 ->visibility('public')
-                ->maxSize(8192)
+                ->maxSize(8192) // 8MB max
                 ->nullable()
                 ->preserveFilenames(false)
+                ->dehydrated(true)
                 ->getUploadedFileNameForStorageUsing(
                     fn(UploadedFile $file): string =>
                     Str::random(40) . '.' . $file->getClientOriginalExtension()
-                ),
+                )
+                ->deleteUploadedFileUsing(function (?string $filePath) {
+                    if ($filePath) {
+                        $fullPath = storage_path('app/public/' . $filePath);
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
+                        }
+                    }
+                }),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
@@ -48,13 +57,22 @@ class UserResource extends Resource
                 ->image()
                 ->imagePreviewHeight(100)
                 ->visibility('public')
-                ->maxSize(15360)
+                ->maxSize(15360) // 15MB max
                 ->nullable()
                 ->preserveFilenames(false)
+                ->dehydrated(true)
                 ->getUploadedFileNameForStorageUsing(
                     fn(UploadedFile $file): string =>
                     Str::random(40) . '.' . $file->getClientOriginalExtension()
-                ),
+                )
+                ->deleteUploadedFileUsing(function (?string $filePath) {
+                    if ($filePath) {
+                        $fullPath = storage_path('app/public/' . $filePath);
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
+                        }
+                    }
+                }),
 
             Forms\Components\TextInput::make('name')
                 ->label('Naam')
@@ -74,7 +92,7 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
-                    ->label('Logo')
+                    ->label('Profielfoto')
                     ->disk('public')
                     ->visibility('public')
                     ->height(50)
