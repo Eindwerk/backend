@@ -38,11 +38,15 @@ class TeamResource extends Resource
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Logo')
                 ->image()
+                ->disk('s3')            // <-- gebruik S3 disk
+                ->directory('teams/profile-image') // optioneel: subfolder in je bucket
                 ->required(false),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
                 ->image()
+                ->disk('s3')            // <-- gebruik S3 disk
+                ->directory('teams/banner-image')
                 ->required(false),
         ]);
     }
@@ -53,6 +57,7 @@ class TeamResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Logo')
+                    ->disk('s3')        // zorg dat image ook van S3 geladen wordt
                     ->height(50)
                     ->circular(),
 
