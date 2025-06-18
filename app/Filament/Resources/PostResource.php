@@ -32,17 +32,21 @@ class PostResource extends Resource
 
             Forms\Components\Select::make('game_id')
                 ->label('Wedstrijd')
-                ->relationship('game', 'id')
+                ->relationship('game', 'title') // mooiere weergave dan id
                 ->searchable()
                 ->required(),
+
+            Forms\Components\Textarea::make('comments')
+                ->label('Reacties')
+                ->required(false),
 
             Forms\Components\FileUpload::make('image')
                 ->label('Afbeelding')
                 ->image()
-                ->disk('s3')                   // S3 disk gebruiken
-                ->directory('posts')           // optionele subfolder
+                ->disk('s3')                   // Pas aan indien nodig
+                ->directory('posts')
                 ->required(false)
-                ->maxSize(2048),               // max 2MB
+                ->maxSize(2048),
         ]);
     }
 
@@ -52,10 +56,11 @@ class PostResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('user.name')->label('Gebruiker')->searchable(),
-                Tables\Columns\TextColumn::make('game.id')->label('Wedstrijd'),
+                Tables\Columns\TextColumn::make('game.title')->label('Wedstrijd'),
+                Tables\Columns\TextColumn::make('comments')->label('Reacties')->limit(50),
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Afbeelding')
-                    ->disk('s3')               // S3 disk gebruiken
+                    ->disk('s3')
                     ->height(50)
                     ->width(50)
                     ->square(),

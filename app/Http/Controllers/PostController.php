@@ -31,6 +31,7 @@ class PostController extends Controller
         }
 
         if ($stadiumId = request('stadium_id')) {
+            // Omdat 'stadium_id' niet in posts staat, zoeken we via relatie game.stadium_id
             $query->whereHas('game', fn($q) => $q->where('stadium_id', $stadiumId));
         }
 
@@ -44,7 +45,7 @@ class PostController extends Controller
         }
 
         $posts = $query
-            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'comments', 'user'])
+            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user'])
             ->latest()
             ->get();
 
@@ -56,17 +57,17 @@ class PostController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('uploads/posts/images', 's3');
+            $data['image'] = $request->file('image')->store('uploads/posts/images', 's3');
         }
 
         $post = Post::create([
             'user_id' => Auth::id(),
             'game_id' => $data['game_id'],
-            'stadium_id' => $data['stadium_id'] ?? null,
-            'image_path' => $data['image_path'] ?? null,
+            'comments' => $data['comments'] ?? null,
+            'image' => $data['image'] ?? null,
         ]);
 
-        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'comments', 'user']);
+        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user']);
 
         return response()->json(new PostResource($post), 201);
     }
@@ -74,7 +75,7 @@ class PostController extends Controller
     public function show(Post $post): JsonResponse
     {
         return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'comments', 'user']))
+            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user']))
         );
     }
 
@@ -85,20 +86,17 @@ class PostController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            if ($post->image_path && Storage::disk('s3')->exists($post->image_path)) {
-                Storage::disk('s3')->delete($post->image_path);
+            if ($post->image && Storage::disk('s3')->exists($post->image)) {
+                Storage::disk('s3')->delete($post->image);
             }
 
-            $data['image_path'] = $request->file('image')->store('uploads/posts/images', 's3');
+            $data['image'] = $request->file('image')->store('uploads/posts/images', 's3');
         }
-
-        // Content niet updaten
-        unset($data['content']);
 
         $post->update($data);
 
         return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'comments', 'user']))
+            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user']))
         );
     }
 
@@ -106,8 +104,8 @@ class PostController extends Controller
     {
         $this->authorizePost($post);
 
-        if ($post->image_path && Storage::disk('s3')->exists($post->image_path)) {
-            Storage::disk('s3')->delete($post->image_path);
+        if ($post->image && Storage::disk('s3')->exists($post->image)) {
+            Storage::disk('s3')->delete($post->image);
         }
 
         $post->delete();
@@ -117,8 +115,8 @@ class PostController extends Controller
 
     public function myPosts(): JsonResponse
     {
-        $posts = tap(Auth::user())->posts()
-            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'comments', 'user'])
+        $posts = Post::where('user_id', Auth::id())
+            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user'])
             ->latest()
             ->get();
 

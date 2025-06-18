@@ -15,7 +15,7 @@ class PostRequest extends FormRequest
     {
         return [
             'game_id' => ['required', 'integer', 'exists:games,id'],
-            'stadium_id' => ['required', 'integer', 'exists:stadia,id'],
+            'comments' => ['nullable', 'string'],       // comments kolom is tekst
             'image' => ['nullable', 'image', 'max:8192'], // max 8MB
         ];
     }

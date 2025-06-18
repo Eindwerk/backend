@@ -9,19 +9,21 @@ class PostResource extends JsonResource
 {
     public function toArray($request): array
     {
-        /** @var \Illuminate\Contracts\Filesystem\Cloud $disk */
-        $disk = Storage::disk('s3');
+        // No need to assign $disk, use Storage::url() directly
 
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
             'game' => new GameResource($this->whenLoaded('game')),
-            'comments' => CommentResource::collection($this->whenLoaded('comments')),
-            'likes' => LikeResource::collection($this->whenLoaded('likes')),
+            // 'comments' als kolom, geen relatie, dus gewoon als string:
+            'comments' => $this->comments,
 
-            'image' => $this->image_path ? $disk->url($this->image_path) : null,
+            // 'likes' relatie kan blijven als je die hebt:
+            'likes' => $this->whenLoaded('likes') ? LikeResource::collection($this->likes) : null,
 
-            'title' => optional($this->game?->homeTeam)->name && optional($this->game?->awayTeam)->name && optional($this->game?->stadium)->name
+            'image' => $this->image ? Storage::url($this->image) : null,
+
+            'title' => $this->game && $this->game->homeTeam && $this->game->awayTeam && $this->game->stadium
                 ? "{$this->game->homeTeam->name} vs {$this->game->awayTeam->name} – {$this->game->stadium->name}"
                 : null,
 

@@ -14,7 +14,7 @@ class Post extends Model
     protected $fillable = [
         'user_id',
         'game_id',
-        'stadium_id',
+        'comments',
         'image',
     ];
 
@@ -28,17 +28,12 @@ class Post extends Model
         return $this->belongsTo(Game::class);
     }
 
-    public function comments(): HasMany
-    {
-        return $this->hasMany(Comment::class);
-    }
-
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
     }
 
-    // Helper accessors om teamnamen makkelijk te krijgen
+    // Helper accessors
 
     public function getHomeTeamAttribute()
     {
