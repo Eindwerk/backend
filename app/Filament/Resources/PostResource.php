@@ -21,6 +21,11 @@ class PostResource extends Resource
     protected static ?string $pluralLabel = 'Posts';
     protected static ?string $navigationGroup = 'Beheer';
 
+    /**
+     * Automatically eager load the comments count.
+     */
+    protected static array $withCount = ['comments'];
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -57,7 +62,10 @@ class PostResource extends Resource
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('user.name')->label('Gebruiker')->searchable(),
                 Tables\Columns\TextColumn::make('game.title')->label('Wedstrijd'),
-                Tables\Columns\TextColumn::make('comments')->label('Reacties')->limit(50),
+                Tables\Columns\TextColumn::make('comments_count')
+                    ->label('Aantal reacties')
+                    ->counts('comments')
+                    ->sortable(),
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Afbeelding')
                     ->disk('s3')

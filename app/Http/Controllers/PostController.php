@@ -31,7 +31,6 @@ class PostController extends Controller
         }
 
         if ($stadiumId = request('stadium_id')) {
-            // Omdat 'stadium_id' niet in posts staat, zoeken we via relatie game.stadium_id
             $query->whereHas('game', fn($q) => $q->where('stadium_id', $stadiumId));
         }
 
@@ -45,7 +44,7 @@ class PostController extends Controller
         }
 
         $posts = $query
-            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user'])
+            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments'])
             ->latest()
             ->get();
 
@@ -63,11 +62,10 @@ class PostController extends Controller
         $post = Post::create([
             'user_id' => Auth::id(),
             'game_id' => $data['game_id'],
-            'comments' => $data['comments'] ?? null,
             'image' => $data['image'] ?? null,
         ]);
 
-        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user']);
+        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments']);
 
         return response()->json(new PostResource($post), 201);
     }
@@ -75,7 +73,7 @@ class PostController extends Controller
     public function show(Post $post): JsonResponse
     {
         return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user']))
+            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments']))
         );
     }
 
@@ -93,10 +91,13 @@ class PostController extends Controller
             $data['image'] = $request->file('image')->store('uploads/posts/images', 's3');
         }
 
+        // Comments niet mee updaten
+        unset($data['comments']);
+
         $post->update($data);
 
         return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user']))
+            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments']))
         );
     }
 
@@ -116,7 +117,7 @@ class PostController extends Controller
     public function myPosts(): JsonResponse
     {
         $posts = Post::where('user_id', Auth::id())
-            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user'])
+            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments'])
             ->latest()
             ->get();
 
