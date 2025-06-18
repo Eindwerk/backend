@@ -58,4 +58,9 @@ class Post extends Model
 
         return "$home vs $away @ $stadium";
     }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
