@@ -23,8 +23,8 @@ class PostResource extends JsonResource
 
             'image' => $this->image ? Storage::url($this->image) : null,
 
-            'title' => $this->game && $this->game->homeTeam && $this->game->awayTeam && $this->game->stadium
-                ? "{$this->game->homeTeam->name} vs {$this->game->awayTeam->name} – {$this->game->stadium->name}"
+            'title' => $this->game && $this->game->homeTeam && $this->game->awayTeam
+                ? "{$this->game->homeTeam->name} vs {$this->game->awayTeam->name}"
                 : null,
 
             'created_at' => $this->created_at?->toIso8601String(),
