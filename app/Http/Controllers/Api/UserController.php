@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -29,6 +30,19 @@ class UserController extends Controller
                 'message' => 'Gebruiker niet gevonden.',
             ], 404);
         }
+
+        return response()->json(new UserResource($user));
+    }
+
+    public function me(): JsonResponse
+    {
+        $user = User::find(Auth::id());
+
+        if (!$user) {
+            return response()->json(['message' => 'Niet ingelogd.'], 401);
+        }
+
+        $user->load('posts');
 
         return response()->json(new UserResource($user));
     }

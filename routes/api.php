@@ -90,8 +90,7 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     return response()->json(['message' => 'Uitgelogd.']);
 });
 
-Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->user());
-
+Route::middleware('auth:sanctum')->get('/me', [UserController::class, 'me']);
 /*
 |--------------------------------------------------------------------------
 | E-MAILVERIFICATIE
