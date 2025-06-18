@@ -44,7 +44,7 @@ class PostController extends Controller
         }
 
         $posts = $query
-            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments'])
+            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes'])
             ->latest()
             ->get();
 
@@ -65,7 +65,7 @@ class PostController extends Controller
             'image' => $data['image'] ?? null,
         ]);
 
-        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments']);
+        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes']);
 
         return response()->json(new PostResource($post), 201);
     }
@@ -73,7 +73,7 @@ class PostController extends Controller
     public function show(Post $post): JsonResponse
     {
         return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments']))
+            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes']))
         );
     }
 
@@ -97,7 +97,7 @@ class PostController extends Controller
         $post->update($data);
 
         return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments']))
+            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes']))
         );
     }
 
@@ -117,7 +117,7 @@ class PostController extends Controller
     public function myPosts(): JsonResponse
     {
         $posts = Post::where('user_id', Auth::id())
-            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments'])
+            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes'])
             ->latest()
             ->get();
 
