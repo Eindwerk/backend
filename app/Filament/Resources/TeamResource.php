@@ -12,8 +12,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class TeamResource extends Resource
 {
@@ -54,11 +54,8 @@ class TeamResource extends Resource
                     return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
                 })
                 ->deleteUploadedFileUsing(function (?string $filePath) {
-                    if ($filePath) {
-                        $fullPath = storage_path('app/public/' . $filePath);
-                        if (file_exists($fullPath)) {
-                            unlink($fullPath);
-                        }
+                    if ($filePath && Storage::disk('public')->exists($filePath)) {
+                        Storage::disk('public')->delete($filePath);
                     }
                 }),
 
@@ -78,11 +75,8 @@ class TeamResource extends Resource
                     return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
                 })
                 ->deleteUploadedFileUsing(function (?string $filePath) {
-                    if ($filePath) {
-                        $fullPath = storage_path('app/public/' . $filePath);
-                        if (file_exists($fullPath)) {
-                            unlink($fullPath);
-                        }
+                    if ($filePath && Storage::disk('public')->exists($filePath)) {
+                        Storage::disk('public')->delete($filePath);
                     }
                 }),
         ]);
