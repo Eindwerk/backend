@@ -16,7 +16,7 @@ class PostResource extends JsonResource
             'user_id' => $this->user_id,
             'game' => new GameResource($this->whenLoaded('game')),
             // 'comments' als kolom, geen relatie, dus gewoon als string:
-            'comments' => $this->comments,
+            'comments' => $this->whenLoaded('comments') ? CommentResource::collection($this->comments) : null,
 
             // 'likes' relatie kan blijven als je die hebt:
             'likes' => $this->whenLoaded('likes') ? LikeResource::collection($this->likes) : null,
