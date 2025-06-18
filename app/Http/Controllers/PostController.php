@@ -7,8 +7,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @OA\Tag(
@@ -56,17 +55,14 @@ class PostController extends Controller
     {
         $data = $request->validated();
 
-        // Upload naar Laravel Storage 'public' disk consistent?
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $data['image_path'] = $file->storeAs('uploads/posts/images', $filename, 'public');
+            $data['image_path'] = $request->file('image')->store('uploads/posts/images', 's3');
         }
 
         $post = Post::create([
             'user_id' => Auth::id(),
             'game_id' => $data['game_id'],
-            'stadium_id' => $data['stadium_id'],
+            'stadium_id' => $data['stadium_id'] ?? null,
             'image_path' => $data['image_path'] ?? null,
         ]);
 
@@ -89,13 +85,11 @@ class PostController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            if ($post->image_path && File::exists(public_path($post->image_path))) {
-                File::delete(public_path($post->image_path));
+            if ($post->image_path && Storage::disk('s3')->exists($post->image_path)) {
+                Storage::disk('s3')->delete($post->image_path);
             }
 
-            $file = $request->file('image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $data['image_path'] = $file->storeAs('uploads/posts/images', $filename, 'public');
+            $data['image_path'] = $request->file('image')->store('uploads/posts/images', 's3');
         }
 
         // Content niet updaten
@@ -112,8 +106,8 @@ class PostController extends Controller
     {
         $this->authorizePost($post);
 
-        if ($post->image_path && File::exists(public_path($post->image_path))) {
-            File::delete(public_path($post->image_path));
+        if ($post->image_path && Storage::disk('s3')->exists($post->image_path)) {
+            Storage::disk('s3')->delete($post->image_path);
         }
 
         $post->delete();

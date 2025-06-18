@@ -16,7 +16,7 @@ class PostRequest extends FormRequest
         return [
             'game_id' => ['required', 'integer', 'exists:games,id'],
             'stadium_id' => ['required', 'integer', 'exists:stadia,id'],
-            'image' => ['nullable', 'image', 'max:8192'],
+            'image' => ['nullable', 'image', 'max:8192'], // max 8MB
         ];
     }
 }

@@ -39,10 +39,10 @@ class PostResource extends Resource
             Forms\Components\FileUpload::make('image')
                 ->label('Afbeelding')
                 ->image()
-                ->disk('public')
-                ->directory('posts')
+                ->disk('s3')                   // S3 disk gebruiken
+                ->directory('posts')           // optionele subfolder
                 ->required(false)
-                ->maxSize(2048) // max 2MB
+                ->maxSize(2048),               // max 2MB
         ]);
     }
 
@@ -55,7 +55,7 @@ class PostResource extends Resource
                 Tables\Columns\TextColumn::make('game.id')->label('Wedstrijd'),
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Afbeelding')
-                    ->disk('public')
+                    ->disk('s3')               // S3 disk gebruiken
                     ->height(50)
                     ->width(50)
                     ->square(),
@@ -90,12 +90,12 @@ class PostResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false; // Pas aan naar true als je wilt toestaan dat posts aangemaakt worden via Filament
+        return false; // Pas aan naar true als aanmaken via Filament gewenst is
     }
 
     public static function canEdit(Model $record): bool
     {
-        return false; // Pas aan naar true als bewerken gewenst is
+        return false; // Pas aan naar true als bewerken via Filament gewenst is
     }
 
     public static function canDelete(Model $record): bool

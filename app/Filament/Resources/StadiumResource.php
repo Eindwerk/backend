@@ -49,13 +49,15 @@ class StadiumResource extends Resource
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Logo')
                 ->image()
-                ->disk('public')
+                ->disk('s3')                // S3 disk
+                ->directory('stadiums/profile-image') // optioneel
                 ->required(false),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
                 ->image()
-                ->disk('public')
+                ->disk('s3')                // S3 disk
+                ->directory('stadiums/banner-image') // optioneel
                 ->required(false),
         ]);
     }
@@ -66,7 +68,7 @@ class StadiumResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Logo')
-                    ->disk('public')
+                    ->disk('s3')             // S3 disk voor ophalen
                     ->height(50)
                     ->circular(),
 

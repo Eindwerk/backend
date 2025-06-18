@@ -27,15 +27,11 @@ class StadiumController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('profile_image')) {
-            $file = $request->file('profile_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $data['profile_image'] = $file->storeAs('uploads/stadiums/profile-image', $filename, 'public');
+            $data['profile_image'] = $request->file('profile_image')->store('uploads/stadiums/profile-image', 's3');
         }
 
         if ($request->hasFile('banner_image')) {
-            $file = $request->file('banner_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $data['banner_image'] = $file->storeAs('uploads/stadiums/banner-image', $filename, 'public');
+            $data['banner_image'] = $request->file('banner_image')->store('uploads/stadiums/banner-image', 's3');
         }
 
         $stadium = Stadium::create($data);
@@ -60,23 +56,19 @@ class StadiumController extends Controller
         ]);
 
         if ($request->hasFile('profile_image')) {
-            if ($stadium->profile_image && Storage::disk('public')->exists($stadium->profile_image)) {
-                Storage::disk('public')->delete($stadium->profile_image);
+            if ($stadium->profile_image && Storage::disk('s3')->exists($stadium->profile_image)) {
+                Storage::disk('s3')->delete($stadium->profile_image);
             }
 
-            $file = $request->file('profile_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $stadium->profile_image = $file->storeAs('uploads/stadiums/profile-image', $filename, 'public');
+            $stadium->profile_image = $request->file('profile_image')->store('uploads/stadiums/profile-image', 's3');
         }
 
         if ($request->hasFile('banner_image')) {
-            if ($stadium->banner_image && Storage::disk('public')->exists($stadium->banner_image)) {
-                Storage::disk('public')->delete($stadium->banner_image);
+            if ($stadium->banner_image && Storage::disk('s3')->exists($stadium->banner_image)) {
+                Storage::disk('s3')->delete($stadium->banner_image);
             }
 
-            $file = $request->file('banner_image');
-            $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $stadium->banner_image = $file->storeAs('uploads/stadiums/banner-image', $filename, 'public');
+            $stadium->banner_image = $request->file('banner_image')->store('uploads/stadiums/banner-image', 's3');
         }
 
         $stadium->save();
@@ -86,12 +78,12 @@ class StadiumController extends Controller
 
     public function destroy(Stadium $stadium): JsonResponse
     {
-        if ($stadium->profile_image && Storage::disk('public')->exists($stadium->profile_image)) {
-            Storage::disk('public')->delete($stadium->profile_image);
+        if ($stadium->profile_image && Storage::disk('s3')->exists($stadium->profile_image)) {
+            Storage::disk('s3')->delete($stadium->profile_image);
         }
 
-        if ($stadium->banner_image && Storage::disk('public')->exists($stadium->banner_image)) {
-            Storage::disk('public')->delete($stadium->banner_image);
+        if ($stadium->banner_image && Storage::disk('s3')->exists($stadium->banner_image)) {
+            Storage::disk('s3')->delete($stadium->banner_image);
         }
 
         $stadium->delete();

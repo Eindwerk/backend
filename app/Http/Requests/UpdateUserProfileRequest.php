@@ -9,7 +9,7 @@ class UpdateUserProfileRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null; // user moet ingelogd zijn
     }
 
     public function rules(): array
@@ -19,10 +19,10 @@ class UpdateUserProfileRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:255',
-                new UniqueUsernameAcrossTables($this->user()->id),
+                new UniqueUsernameAcrossTables($this->user()->id), // custom rule checkt uniekheid over tabellen
             ],
-            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
-            'banner_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],  // max 8MB
+            'banner_image'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'], // max 15MB
         ];
     }
 

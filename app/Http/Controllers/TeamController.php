@@ -27,14 +27,12 @@ class TeamController extends Controller
     {
         $data = $request->validated();
 
-        // Upload en sla profiel afbeelding op
         if ($request->hasFile('profile_image')) {
-            $data['profile_image'] = $this->storeImage($request->file('profile_image'), 'teams/profile-image');
+            $data['profile_image'] = $request->file('profile_image')->store('teams/profile-image', 's3');
         }
 
-        // Upload en sla banner afbeelding op
         if ($request->hasFile('banner_image')) {
-            $data['banner_image'] = $this->storeImage($request->file('banner_image'), 'teams/banner-image');
+            $data['banner_image'] = $request->file('banner_image')->store('teams/banner-image', 's3');
         }
 
         $team = Team::create($data);
@@ -58,12 +56,12 @@ class TeamController extends Controller
 
         if ($request->hasFile('profile_image')) {
             $this->deleteImageIfExists($team->profile_image);
-            $team->profile_image = $this->storeImage($request->file('profile_image'), 'teams/profile-image');
+            $team->profile_image = $request->file('profile_image')->store('teams/profile-image', 's3');
         }
 
         if ($request->hasFile('banner_image')) {
             $this->deleteImageIfExists($team->banner_image);
-            $team->banner_image = $this->storeImage($request->file('banner_image'), 'teams/banner-image');
+            $team->banner_image = $request->file('banner_image')->store('teams/banner-image', 's3');
         }
 
         $team->save();
@@ -81,22 +79,10 @@ class TeamController extends Controller
         return response()->json(null, 204);
     }
 
-    /**
-     * Helper: upload afbeelding met md5 bestandsnaam
-     */
-    protected function storeImage($file, string $directory): string
-    {
-        $filename = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-        return $file->storeAs($directory, $filename, 'public');
-    }
-
-    /**
-     * Helper: verwijder afbeelding als die bestaat
-     */
     protected function deleteImageIfExists(?string $path): void
     {
-        if ($path && Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
+        if ($path && Storage::disk('s3')->exists($path)) {
+            Storage::disk('s3')->delete($path);
         }
     }
 }

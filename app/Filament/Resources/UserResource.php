@@ -10,8 +10,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Model;
 
 class UserResource extends Resource
@@ -29,7 +27,7 @@ class UserResource extends Resource
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Profielfoto')
                 ->image()
-                ->disk('public')
+                ->disk('s3')
                 ->directory('uploads/users/profile-image')
                 ->required(false)
                 ->maxSize(8192), // 8MB
@@ -37,7 +35,7 @@ class UserResource extends Resource
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
                 ->image()
-                ->disk('public')
+                ->disk('s3')
                 ->directory('uploads/users/banner-image')
                 ->required(false)
                 ->maxSize(15360), // 15MB
@@ -61,7 +59,7 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Profielfoto')
-                    ->disk('public')
+                    ->disk('s3')
                     ->height(50)
                     ->circular(),
 
