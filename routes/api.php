@@ -90,9 +90,7 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     return response()->json(['message' => 'Uitgelogd.']);
 });
 
-Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
-    return new UserResource($request->user());
-});
+Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->user());
 
 /*
 |--------------------------------------------------------------------------
