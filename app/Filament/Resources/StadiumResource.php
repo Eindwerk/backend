@@ -12,7 +12,6 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\UploadedFile;
 
 class StadiumResource extends Resource
 {
@@ -49,52 +48,15 @@ class StadiumResource extends Resource
 
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Logo')
-                ->disk('public')
-                ->directory('stadiums/profile-image')
                 ->image()
-                ->imageEditor()
-                ->imagePreviewHeight(100)
-                ->visibility('public')
-                ->preserveFilenames(false)
-                ->dehydrated(true) // <-- toegevoegd voor consistentie
-                ->required(false)
-                ->rules(['image', 'max:1024']) // max 1MB
-                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {
-                    return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-                })
-                ->deleteUploadedFileUsing(function (?string $filePath) {
-                    if ($filePath) {
-                        $fullPath = storage_path('app/public/' . $filePath);
-                        if (file_exists($fullPath)) {
-                            unlink($fullPath);
-                        }
-                    }
-                })
-                ->dehydrated(fn($state) => filled($state)),
+                ->disk('public')
+                ->required(false),
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
-                ->disk('public')
-                ->directory('stadiums/banner-image')
                 ->image()
-                ->imageEditor()
-                ->imagePreviewHeight(100)
-                ->visibility('public')
-                ->preserveFilenames(false)
-                ->dehydrated(true)
-                ->required(false)
-                ->rules(['image', 'max:4096']) // max 4MB
-                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file): string {
-                    return md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-                })
-                ->deleteUploadedFileUsing(function (?string $filePath) {
-                    if ($filePath) {
-                        $fullPath = storage_path('app/public/' . $filePath);
-                        if (file_exists($fullPath)) {
-                            unlink($fullPath);
-                        }
-                    }
-                }),
+                ->disk('public')
+                ->required(false),
         ]);
     }
 
@@ -105,7 +67,6 @@ class StadiumResource extends Resource
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Logo')
                     ->disk('public')
-                    ->visibility('public')
                     ->height(50)
                     ->circular(),
 

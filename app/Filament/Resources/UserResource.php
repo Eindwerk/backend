@@ -28,51 +28,19 @@ class UserResource extends Resource
         return $form->schema([
             Forms\Components\FileUpload::make('profile_image')
                 ->label('Profielfoto')
+                ->image()
                 ->disk('public')
                 ->directory('uploads/users/profile-image')
-                ->image()
-                ->imagePreviewHeight(150)
-                ->visibility('public')
-                ->maxSize(8192) // 8MB max
-                ->nullable()
-                ->preserveFilenames(false)
-                ->dehydrated(true)
-                ->getUploadedFileNameForStorageUsing(
-                    fn(UploadedFile $file): string =>
-                    Str::random(40) . '.' . $file->getClientOriginalExtension()
-                )
-                ->deleteUploadedFileUsing(function (?string $filePath) {
-                    if ($filePath) {
-                        $fullPath = storage_path('app/public/' . $filePath);
-                        if (file_exists($fullPath)) {
-                            unlink($fullPath);
-                        }
-                    }
-                }),
+                ->required(false)
+                ->maxSize(8192), // 8MB
 
             Forms\Components\FileUpload::make('banner_image')
                 ->label('Banner')
+                ->image()
                 ->disk('public')
                 ->directory('uploads/users/banner-image')
-                ->image()
-                ->imagePreviewHeight(100)
-                ->visibility('public')
-                ->maxSize(15360) // 15MB max
-                ->nullable()
-                ->preserveFilenames(false)
-                ->dehydrated(true)
-                ->getUploadedFileNameForStorageUsing(
-                    fn(UploadedFile $file): string =>
-                    Str::random(40) . '.' . $file->getClientOriginalExtension()
-                )
-                ->deleteUploadedFileUsing(function (?string $filePath) {
-                    if ($filePath) {
-                        $fullPath = storage_path('app/public/' . $filePath);
-                        if (file_exists($fullPath)) {
-                            unlink($fullPath);
-                        }
-                    }
-                }),
+                ->required(false)
+                ->maxSize(15360), // 15MB
 
             Forms\Components\TextInput::make('name')
                 ->label('Naam')
@@ -94,7 +62,6 @@ class UserResource extends Resource
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('Profielfoto')
                     ->disk('public')
-                    ->visibility('public')
                     ->height(50)
                     ->circular(),
 
