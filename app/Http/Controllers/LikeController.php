@@ -57,6 +57,7 @@ class LikeController extends Controller
                 'sender_id' => Auth::id(),
                 'type' => 'like',
                 'post_id' => $post->id,
+                'game_id' => $post->game_id,
             ]);
         }
 

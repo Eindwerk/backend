@@ -147,4 +147,12 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     {
         return $this->canAccessFilament();
     }
+
+    /**
+     * Gebruikers die deze gebruiker volgen
+     */
+    public function followers(): MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'followable', 'follows');
+    }
 }

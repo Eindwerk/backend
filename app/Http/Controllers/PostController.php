@@ -32,22 +32,14 @@ class PostController extends Controller
         }
 
         if ($stadiumId = request('stadium_id')) {
-            $query->whereHas('game', fn($q) => $q->where('stadium_id', $stadiumId));
+            $query->where('stadium_id', $stadiumId);
         }
 
         if ($teamId = request('team_id')) {
-            $query->whereHas(
-                'game',
-                fn($q) =>
-                $q->where('home_team_id', $teamId)
-                    ->orWhere('away_team_id', $teamId)
-            );
+            $query->where('team_id', $teamId);
         }
 
-        $posts = $query
-            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes'])
-            ->latest()
-            ->get();
+        $posts = $query->latest()->get();
 
         return response()->json(PostResource::collection($posts));
     }
@@ -57,24 +49,28 @@ class PostController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('uploads/posts/images', 's3');
+            $data['image'] = $request->file('image')->store('posts', 's3');
         }
 
         $post = Post::create([
             'user_id' => Auth::id(),
             'game_id' => $data['game_id'],
+            'stadium_id' => $data['stadium_id'] ?? null,
+            'team_id' => $data['team_id'] ?? null,
+            'caption' => $data['caption'] ?? null,
             'image' => $data['image'] ?? null,
         ]);
 
-        // Na het aanmaken van de post:
+        // Notificaties voor followers (of vrienden)
         $user = Auth::user();
-        foreach ($user->friendships as $friendship) {
-            $friend = $friendship->friend;
+        // Pas deze relatie aan naar jouw eigen followers-relatie indien nodig!
+        foreach ($user->followers as $follower) {
             Notification::create([
-                'user_id' => $friend->id,
+                'user_id' => $follower->id,
                 'sender_id' => $user->id,
                 'type' => 'friend_post',
                 'post_id' => $post->id,
+                'game_id' => $post->game_id,
             ]);
         }
 
@@ -85,9 +81,8 @@ class PostController extends Controller
 
     public function show(Post $post): JsonResponse
     {
-        return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes']))
-        );
+        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes']);
+        return response()->json(new PostResource($post));
     }
 
     public function update(PostRequest $request, Post $post): JsonResponse
@@ -97,11 +92,7 @@ class PostController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            if ($post->image && Storage::disk('s3')->exists($post->image)) {
-                Storage::disk('s3')->delete($post->image);
-            }
-
-            $data['image'] = $request->file('image')->store('uploads/posts/images', 's3');
+            $data['image'] = $request->file('image')->store('posts', 's3');
         }
 
         // Comments niet mee updaten
@@ -109,9 +100,9 @@ class PostController extends Controller
 
         $post->update($data);
 
-        return response()->json(
-            new PostResource($post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes']))
-        );
+        $post->load(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes']);
+
+        return response()->json(new PostResource($post));
     }
 
     public function destroy(Post $post): JsonResponse
@@ -129,18 +120,14 @@ class PostController extends Controller
 
     public function myPosts(): JsonResponse
     {
-        $posts = Post::where('user_id', Auth::id())
-            ->with(['game.homeTeam', 'game.awayTeam', 'game.stadium', 'user', 'comments', 'likes'])
-            ->latest()
-            ->get();
-
+        $posts = Post::where('user_id', Auth::id())->latest()->get();
         return response()->json(PostResource::collection($posts));
     }
 
     protected function authorizePost(Post $post): void
     {
         if ($post->user_id !== Auth::id()) {
-            abort(403, 'Not authorized.');
+            abort(403, 'Je bent niet gemachtigd om deze post te bewerken.');
         }
     }
 }
