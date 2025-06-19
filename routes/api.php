@@ -199,6 +199,9 @@ Route::middleware(['auth:sanctum', ApiKeyMiddleware::class])->group(function () 
     Route::post('/follow',     [FollowController::class, 'follow']);
     Route::delete('/unfollow', [FollowController::class, 'unfollow']);
     Route::get('/following',   [FollowController::class, 'index']);
+    Route::get('/followers',   function (Request $request) {
+        return response()->json($request->user()->followers);
+    });
 });
 
 /*
