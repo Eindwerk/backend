@@ -59,7 +59,8 @@ class GameController extends Controller
      *         description="Wedstrijd aangemaakt",
      *         @OA\JsonContent(ref="#/components/schemas/Game")
      *     ),
-     *     @OA\Response(response=401, description="Niet geauthenticeerd")
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=422, description="Validatiefout")
      * )
      */
     public function store(GameRequest $request): JsonResponse
@@ -128,7 +129,8 @@ class GameController extends Controller
      *         description="Wedstrijd geüpdatet",
      *         @OA\JsonContent(ref="#/components/schemas/Game")
      *     ),
-     *     @OA\Response(response=401, description="Niet geauthenticeerd")
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=422, description="Validatiefout")
      * )
      */
     public function update(GameRequest $request, Game $game): JsonResponse

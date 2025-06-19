@@ -15,7 +15,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="post_id", type="integer", example=12),
  *     @OA\Property(property="comment", type="string", example="Leuke sfeer tijdens de match!"),
  *     @OA\Property(property="created_at", type="string", format="date-time", readOnly=true, example="2025-05-14T10:00:00Z"),
- *     @OA\Property(property="updated_at", type="string", format="date-time", readOnly=true, example="2025-05-14T10:05:00Z")
+ *     @OA\Property(property="updated_at", type="string", format="date-time", readOnly=true, example="2025-05-14T10:05:00Z"),
+ *     @OA\Property(
+ *         property="user",
+ *         ref="#/components/schemas/User",
+ *         nullable=true
+ *     )
  * )
  */
 class CommentResource extends JsonResource

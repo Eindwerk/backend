@@ -36,6 +36,10 @@ class CommentController extends Controller
      *         response=201,
      *         description="Reactie succesvol aangemaakt",
      *         @OA\JsonContent(ref="#/components/schemas/Comment")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validatiefout"
      *     )
      * )
      */
@@ -82,7 +86,7 @@ class CommentController extends Controller
      *     ),
      *     @OA\Response(
      *         response=403,
-     *         description="Geen toestemming om deze reactie te verwijderen"
+     *         description="Je hebt geen rechten om deze reactie te verwijderen"
      *     )
      * )
      */

@@ -8,8 +8,40 @@ use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Tag(
+ *     name="Profiel",
+ *     description="Gebruikersprofiel bewerken"
+ * )
+ */
 class UserProfileController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/users/profile",
+     *     summary="Update het profiel van de ingelogde gebruiker",
+     *     tags={"Profiel"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"username"},
+     *                 @OA\Property(property="username", type="string", example="newusername"),
+     *                 @OA\Property(property="profile_image", type="string", format="binary"),
+     *                 @OA\Property(property="banner_image", type="string", format="binary")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profiel succesvol bijgewerkt",
+     *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(response=422, description="Validatiefout")
+     * )
+     */
     public function update(UpdateUserProfileRequest $request): JsonResponse
     {
         $user = $request->user();

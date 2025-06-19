@@ -93,9 +93,16 @@ class VisitController extends Controller
      *     summary="Toon een specifiek stadionbezoek",
      *     tags={"Visits"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, description="ID van het bezoek", @OA\Schema(type="integer")),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID van het bezoek",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
      *     @OA\Response(response=200, description="Bezoekdetails", @OA\JsonContent(ref="#/components/schemas/Visit")),
-     *     @OA\Response(response=403, description="Geen toegang tot dit bezoek")
+     *     @OA\Response(response=403, description="Geen toegang tot dit bezoek"),
+     *     @OA\Response(response=404, description="Bezoek niet gevonden")
      * )
      */
     public function show(Visit $visit): JsonResponse
@@ -111,16 +118,23 @@ class VisitController extends Controller
      *     summary="Update een stadionbezoek",
      *     tags={"Visits"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, description="ID van het bezoek", @OA\Schema(type="integer")),
-     *     @OA\RequestBody(
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
      *         required=true,
+     *         description="ID van het bezoek",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
      *         @OA\JsonContent(
      *             @OA\Property(property="visited_at", type="string", format="date", example="2025-05-12"),
      *             @OA\Property(property="notes", type="string", example="Bijgewerkte notitie")
      *         )
      *     ),
      *     @OA\Response(response=200, description="Bezoek geüpdatet", @OA\JsonContent(ref="#/components/schemas/Visit")),
-     *     @OA\Response(response=403, description="Niet gemachtigd")
+     *     @OA\Response(response=403, description="Niet gemachtigd"),
+     *     @OA\Response(response=404, description="Bezoek niet gevonden")
      * )
      */
     public function update(VisitRequest $request, Visit $visit): JsonResponse
@@ -135,12 +149,19 @@ class VisitController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/visits/{id}",
-     *     summary="Verwijder een bezoek",
+     *     summary="Verwijder een stadionbezoek",
      *     tags={"Visits"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, description="ID van het bezoek", @OA\Schema(type="integer")),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID van het bezoek",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
      *     @OA\Response(response=204, description="Bezoek verwijderd"),
-     *     @OA\Response(response=403, description="Niet gemachtigd")
+     *     @OA\Response(response=403, description="Niet gemachtigd"),
+     *     @OA\Response(response=404, description="Bezoek niet gevonden")
      * )
      */
     public function destroy(Visit $visit): JsonResponse

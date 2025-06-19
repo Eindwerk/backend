@@ -36,7 +36,8 @@ class LikeController extends Controller
      *         description="Post geliket",
      *         @OA\JsonContent(ref="#/components/schemas/Like")
      *     ),
-     *     @OA\Response(response=401, description="Niet geauthenticeerd")
+     *     @OA\Response(response=401, description="Niet geauthenticeerd"),
+     *     @OA\Response(response=422, description="Validatiefout")
      * )
      */
     public function store(LikeRequest $request): JsonResponse
@@ -50,8 +51,7 @@ class LikeController extends Controller
 
         $post = Post::find($validated['post_id']);
 
-        // Na het aanmaken van de like:
-        if ($post->user_id !== Auth::id()) {
+        if ($post && $post->user_id !== Auth::id()) {
             Notification::create([
                 'user_id' => $post->user_id,
                 'sender_id' => Auth::id(),

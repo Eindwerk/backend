@@ -17,8 +17,8 @@ class FollowController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/api/follow",
-     *     summary="Volg een team, stadion of user",
+     *     path="/follow",
+     *     summary="Volg een team, stadion of gebruiker",
      *     tags={"Follows"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
@@ -68,8 +68,8 @@ class FollowController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/unfollow",
-     *     summary="Ontvolg een team, stadion of user",
+     *     path="/unfollow",
+     *     summary="Ontvolg een team, stadion of gebruiker",
      *     tags={"Follows"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
@@ -108,15 +108,24 @@ class FollowController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/follows",
-     *     summary="Overzicht van alles wat de gebruiker volgt",
+     *     path="/following",
+     *     summary="Lijst van gevolgde items door de gebruiker",
      *     tags={"Follows"},
      *     security={{"sanctum":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Lijst met volgitems",
      *         @OA\JsonContent(
-     *             @OA\Property(property="follows", type="array", @OA\Items(type="object"))
+     *             @OA\Property(
+     *                 property="follows",
+     *                 type="array",
+     *                 @OA\Items(type="object",
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="followable_type", type="string"),
+     *                     @OA\Property(property="followable_id", type="integer"),
+     *                     @OA\Property(property="followable", type="object")
+     *                 )
+     *             )
      *         )
      *     )
      * )

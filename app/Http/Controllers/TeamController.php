@@ -17,12 +17,52 @@ use Illuminate\Support\Facades\Storage;
  */
 class TeamController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/teams",
+     *     summary="Toon alle teams",
+     *     tags={"Teams"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lijst van teams",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Team"))
+     *     )
+     * )
+     */
     public function index(): JsonResponse
     {
         $teams = Team::all();
         return response()->json(TeamResource::collection($teams));
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/teams",
+     *     summary="Voeg een nieuw team toe",
+     *     tags={"Teams"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name"},
+     *                 @OA\Property(property="name", type="string", example="RSC Anderlecht"),
+     *                 @OA\Property(property="league_id", type="integer", example=3),
+     *                 @OA\Property(property="profile_image", type="string", format="binary"),
+     *                 @OA\Property(property="banner_image", type="string", format="binary")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Team aangemaakt",
+     *         @OA\JsonContent(ref="#/components/schemas/Team")
+     *     ),
+     *     @OA\Response(response=422, description="Validatiefout")
+     * )
+     */
     public function store(StoreTeamRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -40,11 +80,46 @@ class TeamController extends Controller
         return response()->json(new TeamResource($team), 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/teams/{id}",
+     *     summary="Toon een specifiek team",
+     *     tags={"Teams"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Team details", @OA\JsonContent(ref="#/components/schemas/Team")),
+     *     @OA\Response(response=404, description="Team niet gevonden")
+     * )
+     */
     public function show(Team $team): JsonResponse
     {
         return response()->json(new TeamResource($team));
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/teams/{id}",
+     *     summary="Update teamgegevens (PATCH via _method)",
+     *     tags={"Teams"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="_method", type="string", example="PATCH"),
+     *                 @OA\Property(property="name", type="string", example="Club Brugge"),
+     *                 @OA\Property(property="league_id", type="integer", example=2),
+     *                 @OA\Property(property="profile_image", type="string", format="binary"),
+     *                 @OA\Property(property="banner_image", type="string", format="binary")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Team geüpdatet", @OA\JsonContent(ref="#/components/schemas/Team")),
+     *     @OA\Response(response=422, description="Validatiefout")
+     * )
+     */
     public function update(UpdateTeamProfileRequest $request, Team $team): JsonResponse
     {
         $data = $request->validated();
@@ -69,6 +144,17 @@ class TeamController extends Controller
         return response()->json(new TeamResource($team));
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/teams/{id}",
+     *     summary="Verwijder een team",
+     *     tags={"Teams"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=204, description="Team verwijderd"),
+     *     @OA\Response(response=404, description="Team niet gevonden")
+     * )
+     */
     public function destroy(Team $team): JsonResponse
     {
         $this->deleteImageIfExists($team->profile_image);

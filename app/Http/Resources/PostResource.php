@@ -5,6 +5,30 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Schema(
+ *     schema="Post",
+ *     type="object",
+ *     required={"user_id", "game"},
+ *     @OA\Property(property="id", type="integer", example=12),
+ *     @OA\Property(property="user_id", type="integer", example=3),
+ *     @OA\Property(property="game", ref="#/components/schemas/Game"),
+ *     @OA\Property(
+ *         property="comments",
+ *         type="array",
+ *         @OA\Items(ref="#/components/schemas/Comment")
+ *     ),
+ *     @OA\Property(
+ *         property="likes",
+ *         type="array",
+ *         @OA\Items(ref="#/components/schemas/Like")
+ *     ),
+ *     @OA\Property(property="image", type="string", format="uri", nullable=true, example="https://example.com/storage/posts/12345.jpg"),
+ *     @OA\Property(property="title", type="string", nullable=true, example="FC Barcelona vs Real Madrid"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-06-01T14:20:00Z"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-06-01T15:00:00Z")
+ * )
+ */
 class PostResource extends JsonResource
 {
     public function toArray($request): array

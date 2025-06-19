@@ -15,7 +15,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="away_team_id", type="integer", example=4),
  *     @OA\Property(property="match_date", type="string", format="date", example="2025-05-14"),
  *     @OA\Property(property="created_at", type="string", format="date-time", readOnly=true, example="2025-05-14T10:00:00Z"),
- *     @OA\Property(property="updated_at", type="string", format="date-time", readOnly=true, example="2025-05-14T10:05:00Z")
+ *     @OA\Property(property="updated_at", type="string", format="date-time", readOnly=true, example="2025-05-14T10:05:00Z"),
+ *     @OA\Property(property="stadium", ref="#/components/schemas/Stadium", nullable=true),
+ *     @OA\Property(property="home_team", ref="#/components/schemas/Team", nullable=true),
+ *     @OA\Property(property="away_team", ref="#/components/schemas/Team", nullable=true)
  * )
  */
 class GameResource extends JsonResource
